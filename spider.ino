@@ -1,25 +1,20 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+#include <WS2812FX.h>
 
-// use first channel of 16 channels (started from zero)
-#define LEDC_CHANNEL_0     0
-#define LEDC_CHANNEL_1     1
-#define LEDC_CHANNEL_2     2
-#define LEDC_CHANNEL_3     3
-#define LEDC_CHANNEL_4     4
-#define LEDC_CHANNEL_5     5
-#define LEDC_CHANNEL_6     6
-#define LEDC_CHANNEL_7     7
-#define LEDC_CHANNEL_8     8
-#define LEDC_CHANNEL_9     9
-#define LEDC_CHANNEL_10    10
-#define LEDC_CHANNEL_11    11
-#define LEDC_CHANNEL_12    12
-#define LEDC_CHANNEL_13    13
-#define LEDC_CHANNEL_14    14
-#define LEDC_CHANNEL_15    15
+/* led DECLARATION START */
+#define LED_COUNT 8
+#define LED_PIN 21
+#define TIMER_MS 5000
 
+WS2812FX ws2812fx = WS2812FX(LED_COUNT, LED_PIN, NEO_RGB + NEO_KHZ800);
+unsigned long last_change = 0;
+unsigned long now = 0;
+
+/* led DECLARATION END */
+
+/* PWM DECLARATION START*/
 // use 12 bit precission for LEDC timer
 #define LEDC_TIMER_12_BIT  12
 
@@ -28,9 +23,18 @@
 
 #define MIN 50
 #define MAX 550
-#define STEP 25
-#define TIME 250
 
+#define ARM_1 0
+#define ARM_2 1
+#define ARM_3 2
+#define ARM_4 3
+#define LEG_1 4
+#define LEG_2 5
+#define LEG_3 6
+#define LEG_4 7
+/* PWM DECLARATION END */
+
+/* SERVER DECLARATION START */
 /* Put your SSID & Password */
 const char* ssid = "iSEB Spider";  // Enter SSID here
 const char* password = "12345678";  //Enter Password here
@@ -42,42 +46,33 @@ IPAddress subnet(255,255,255,0);
 
 WebServer server(80);
 
+/* SERVER DECLARATION END */
+
+/* MOTOR DECLARATION START */
 // Motion data index
-int Servo_PROGRAM;
+int Servo_PROGRAM = 0;
 
 // Servos matrix
 const int ALLMATRIX = 9; // GPIO14 + GPIO12 + GPIO13 + GPIO15 + GPIO16 + GPIO5 + GPIO4 + GPIO2 + Run Time
 const int ALLSERVOS = 8; // GPIO14 + GPIO12 + GPIO13 + GPIO15 + GPIO16 + GPIO5 + GPIO4 + GPIO2
 
-// MG90S servo PWM pulse traveling
-const int PWMRES_Min = 1; // PWM Resolution 1
-const int PWMRES_Max = 180; // PWM Resolution 180
-const int SERVOMIN = 400; // 400
-const int SERVOMAX = 2400; // 2400
-
 // Servo delay base time
-const int BASEDELAYTIME = 10; // 10 ms
+const int BASEDELAYTIME = 50; // 10 ms
 
 // Backup servo value
-int Running_Servo_POS [ALLMATRIX];
-
-// Action
-// --------------------------------------------------------------------------------
+int Running_Servo_POS [ALLMATRIX] = {};
 
 // Servo zero position 歸零位置
-// ----------------------------- G14, G12, G13, G15, G16,  G5,  G4,  G2,  ms
-int Servo_Act_0 [ ] PROGMEM = {  135,  45, 135,  45,  45, 135,  45, 135,  500  };
-
-// Start position 起始位置
-// ----------------------------- G14, G12, G13, G15, G16,  G5,  G4,  G2,  ms
-int Servo_Act_1 [ ] PROGMEM = {  135,  45, 135,  45,  45, 135,  45, 135,  500  };
+// int Servo_Act_0 [ ] PROGMEM = {  30,  20, 20,  150,  90, 90,  90, 90,  500  };
+int Servo_Act_0 [ ] PROGMEM = {  90,  90, 90,  90,  90, 90, 90, 90,  500  };
+// int Servo_Act_0 [ ] PROGMEM = {  20,  20, 20,  20,  150, 150,  150, 150,  500  };
+// int Servo_Act_0 [ ] PROGMEM = {  180,  180, 180,  180,  180, 180,  180, 180,  500  };
 
 // Standby 待機
 int Servo_Prg_1_Step = 2;
 int Servo_Prg_1 [][ALLMATRIX] PROGMEM = {
-  // G14, G12, G13, G15, G16,  G5,  G4,  G2,  ms
   {   90,  90,  90,  90,  90,  90,  90,  90,  500  }, // servo center point
-  {   70,  90,  90, 110, 110,  90,  90,  70,  500  }, // standby
+  {   70,  110,  70, 110, 90,  90,  90,  90,  500  }, // standby
 };
 
 // Forward 前行
@@ -282,220 +277,53 @@ int Servo_Prg_15 [][ALLMATRIX] PROGMEM = {
   {   70,  90,  90, 110, 110,  90,  90,  70,  300  }, // standby
 };
 
-// --------------------------------------------------------------------------------
+/* MOTOR DECLARATION START */
 
-
-
-// Servo
-// --------------------------------------------------------------------------------
-
-
-
-void Set_PWM_to_Servo(int iServo, int iValue)
-{
-  // 讀取 EEPROM 修正誤差
-  int NewPWM = iValue /*+ (int8_t)EEPROM.read(iServo)*/;
-
-  NewPWM = map(NewPWM, PWMRES_Min, PWMRES_Max, SERVOMIN, SERVOMAX);
-
-  // if (iServo >= 7) {
-  //   GPIO2SERVO.write(NewPWM);
-  // } else if (iServo >= 6) {
-  //   GPIO4SERVO.write(NewPWM);
-  // } else if (iServo >= 5) {
-  //   GPIO5SERVO.write(NewPWM);
-  // } else if (iServo >= 4) {
-  //   GPIO16SERVO.write(NewPWM);
-  // } else if (iServo >= 3) {
-  //   GPIO15SERVO.write(NewPWM);
-  // } else if (iServo >= 2) {
-  //   GPIO13SERVO.write(NewPWM);
-  // } else if (iServo >= 1) {
-  //   GPIO12SERVO.write(NewPWM);
-  // } else if (iServo == 0) {
-  //   GPIO14SERVO.write(NewPWM);
-  // }
-}
-
-void Servo_PROGRAM_Zero()
-{
-  // 清除備份目前馬達數值
-  for (int Index = 0; Index < ALLMATRIX; Index++) {
-    Running_Servo_POS[Index] = Servo_Act_0[Index];
-  }
-
-  // 重新載入馬達預設數值
-  for (int iServo = 0; iServo < ALLSERVOS; iServo++) {
-    Set_PWM_to_Servo(iServo, Running_Servo_POS[iServo]);
-    delay(10);
-  }
-}
-
-void Servo_PROGRAM_Center()
-{
-  // 清除備份目前馬達數值
-  for (int Index = 0; Index < ALLMATRIX; Index++) {
-    Running_Servo_POS[Index] = Servo_Act_1[Index];
-  }
-
-  // 重新載入馬達預設數值
-  for (int iServo = 0; iServo < ALLSERVOS; iServo++) {
-    Set_PWM_to_Servo(iServo, Running_Servo_POS[iServo]);
-    delay(10);
-  }
-}
-
-void Servo_PROGRAM_Run(int iMatrix[][ALLMATRIX], int iSteps)
-{
-  int INT_TEMP_A, INT_TEMP_B, INT_TEMP_C;
-
-  for (int MainLoopIndex = 0; MainLoopIndex < iSteps; MainLoopIndex++) { // iSteps 步驟主迴圈
-
-    int InterTotalTime = iMatrix[MainLoopIndex][ALLMATRIX - 1]; // InterTotalTime 此步驟總時間
-
-    int InterDelayCounter = InterTotalTime / BASEDELAYTIME; // InterDelayCounter 此步驟基本延遲次數
-
-    for (int InterStepLoop = 0; InterStepLoop < InterDelayCounter; InterStepLoop++) { // 內差次數迴圈
-
-      for (int ServoIndex = 0; ServoIndex < ALLSERVOS; ServoIndex++) { // 馬達主迴圈
-
-        INT_TEMP_A = Running_Servo_POS[ServoIndex]; // 馬達現在位置
-        INT_TEMP_B = iMatrix[MainLoopIndex][ServoIndex]; // 馬達目標位置
-
-        if (INT_TEMP_A == INT_TEMP_B) { // 馬達數值不變
-          INT_TEMP_C = INT_TEMP_B;
-        } else if (INT_TEMP_A > INT_TEMP_B) { // 馬達數值減少
-          INT_TEMP_C =  map(BASEDELAYTIME * InterStepLoop, 0, InterTotalTime, 0, INT_TEMP_A - INT_TEMP_B); // PWM內差值 = map(執行次數時間累加, 開始時間, 結束時間, 內差起始值, 內差最大值)
-          if (INT_TEMP_A - INT_TEMP_C >= INT_TEMP_B) {
-            Set_PWM_to_Servo(ServoIndex, INT_TEMP_A - INT_TEMP_C);
-          }
-        } else if (INT_TEMP_A < INT_TEMP_B) { // 馬達數值增加
-          INT_TEMP_C =  map(BASEDELAYTIME * InterStepLoop, 0, InterTotalTime, 0, INT_TEMP_B - INT_TEMP_A); // PWM內差值 = map(執行次數時間累加, 開始時間, 結束時間, 內差起始值, 內差最大值)
-          if (INT_TEMP_A + INT_TEMP_C <= INT_TEMP_B) {
-            Set_PWM_to_Servo(ServoIndex, INT_TEMP_A + INT_TEMP_C);
-          }
-        }
-
-      }
-
-      delay(BASEDELAYTIME);
-    }
-
-    // 備份目前馬達數值
-    for (int Index = 0; Index < ALLMATRIX; Index++) {
-      Running_Servo_POS[Index] = iMatrix[MainLoopIndex][Index];
-    }
-  }
-}
-
+/* PWM CODE START */
 void motorInit()
 {
-  // Setup timer and attach timer to a led pin
-  ledcSetup(LEDC_CHANNEL_0, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_5, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_6, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_7, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_8, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_9, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_10, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_11, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_12, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_13, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_14, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEDC_CHANNEL_15, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  // Setup timer 
+  ledcSetup(ARM_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(ARM_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(ARM_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(ARM_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(LEG_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(LEG_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(LEG_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(LEG_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
  
-  ledcAttachPin(13, 0);
-  ledcAttachPin(12, 1);
-  ledcAttachPin(14, 2);
-  ledcAttachPin(27, 3);
+  // Attach timer to a led pin
+  ledcAttachPin(12, ARM_1);  /* ARM 1 *//* CN1 */
+  ledcAttachPin(33, ARM_2);  /* ARM 2 *//* CN7 */
+  ledcAttachPin(15, ARM_3);  /* ARM 3 *//* CN9 */
+  ledcAttachPin(19, ARM_4);  /* ARM 4 *//* CN15 */
+  ledcAttachPin(13, LEG_1);  /* LEG 1 *//* CN2 */
+  ledcAttachPin(32, LEG_2);  /* LEG 2 *//* CN8 */
+  ledcAttachPin( 4, LEG_3);  /* LEG 3 *//* CN10 */
+  ledcAttachPin(23, LEG_4);  /* LEG 4 *//* CN16 */
 
-  ledcAttachPin(26, 4);
-  ledcAttachPin(25, 5);
-  ledcAttachPin(33, 6);
-  ledcAttachPin(32, 7);
-
-  ledcAttachPin(15, 8);
-  ledcAttachPin( 4, 9);
-  ledcAttachPin(16, 10);
-  ledcAttachPin(17, 11);
-
-  ledcAttachPin( 5, 12);
-  ledcAttachPin(18, 13);
-  ledcAttachPin(19, 14);
-  ledcAttachPin(23, 15);
 }
-void writeKeyValue(int8_t key, int8_t value)
-{
-  // EEPROM.write(key, value);
-  // EEPROM.commit();
-}
+/* PWM CODE END */
 
-int8_t readKeyValue(int8_t key)
-{
-  // Serial.println("read");
-  // Serial.println(key);
-
-  // int8_t value = EEPROM.read(key);
-}
-
-void handleAction(WiFiClient client, String req, HTTPMethod method)
-{
-  server.send(200, "text/plain", "Hello!");
-}
-
-void handleSave()
-{
-  String key = server.arg("key");
-  String value = server.arg("value");
-
-  Serial.println("Save key: "+key+" value: "+value);
-  int8_t keyInt = key.toInt();
-  int8_t valueInt = value.toInt();
-  delay(50);
-
-  if (keyInt == 100) {
-    writeKeyValue(0, 0);
-    writeKeyValue(1, 0);
-    writeKeyValue(2, 0);
-    writeKeyValue(3, 0);
-    writeKeyValue(4, 0);
-    writeKeyValue(5, 0);
-    writeKeyValue(6, 0);
-    writeKeyValue(7, 0);
-  } else {
-    if (valueInt >= -124 && valueInt <= 124) { // 確認資料介於 -124 ~ 124
-      writeKeyValue(keyInt, valueInt); // 儲存校正值
-    }
-  }
-
-  delay(10);
-
-  server.send(200, "text/html", "(key, value)=(" + key + "," + value + ")");
-}
-
+/* SERVER CODE START */
 void handleController()
 {
   String pm = server.arg("pm");
   String servo = server.arg("servo");
   Serial.println("Controller pm: "+pm+" servo: "+servo);
-  // if (pm != "") {
-  //   Servo_PROGRAM = pm.toInt();
-  // }
+  if (pm != "") {
+    Servo_PROGRAM = pm.toInt();
+  }
 
-  // if (servo != "") {
-  //   GPIO_ID = servo.toInt();
-  //   String ival = server.arg("value");
-  //   Set_PWM_to_Servo(GPIO_ID, ival.toInt());
-  // }
+  if (servo != "") {
+    String ival = server.arg("value");
+    // Set_PWM_to_Servo(servo.toInt(), ival.toInt());
+  }
 
   server.send(200, "text/html", "(pm)=(" + pm + ")");
 }
 
-void handleOnLine()
+void handleOnLed()
 {
   String m0 = server.arg("m0");
   String m1 = server.arg("m1");
@@ -605,267 +433,6 @@ void handleZero()
   server.send(200, "text/html", content);
 }
 
-// Servo calibration
-void handleSetting()
-{
-  int servo7Val = readKeyValue(7);
-  String servo7ValStr = String(servo7Val);
-  int servo6Val = readKeyValue(6);
-  String servo6ValStr = String(servo6Val);
-  int servo5Val = readKeyValue(5);
-  String servo5ValStr = String(servo5Val);
-  int servo4Val = readKeyValue(4);
-  String servo4ValStr = String(servo4Val);
-  int servo3Val = readKeyValue(3);
-  String servo3ValStr = String(servo3Val);
-  int servo2Val = readKeyValue(2);
-  String servo2ValStr = String(servo2Val);
-  int servo1Val = readKeyValue(1);
-  String servo1ValStr = String(servo1Val);
-  int servo0Val = readKeyValue(0);
-  String servo0ValStr = String(servo0Val);
-  String content = "";
-
-  content += "<html>";
-  content += "<head>";
-  content += "<title>Servo calibration</title>";
-  content += "<meta charset=UTF-8>";
-  content += "<meta name=viewport content=width=device-width>";
-  content += "<style type=text/css>";
-  content += "body {";
-  content += "margin: 0px;";
-  content += "backgound-color: #FFFFFF;";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 100%;";
-  content += "color: #555555;";
-  content += "}";
-  content += "td {";
-  content += "text-align: center;";
-  content += "}";
-  content += "span {";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 70%;";
-  content += "color: #777777;";
-  content += "}";
-  content += "input[type=text] {";
-  content += "width: 40%;";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 90%;";
-  content += "color: #555555;";
-  content += "text-align: center;";
-  content += "padding: 3px 3px 3px 3px;";
-  content += "}";
-  content += "button {";
-  content += "width: 40%;";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 90%;";
-  content += "color: #555555;";
-  content += "background: #BFDFFF;";
-  content += "padding: 5px 5px 5px 5px;";
-  content += "border: none;";
-  content += "}";
-  content += "</style>";
-  content += "</head>";
-  content += "<body>";
-  content += "<br>";
-  content += "<table width=100% height=90%>";
-  content += "<tr>";
-  content += "<td width=50%>D16<br/><input type=text id=servo_4 value=\"" + servo4ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(4,'servo_4')>SET</button></td>";
-  content += "<td width=50%>D14<br/><input type=text id=servo_0 value=\"" + servo0ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(0,'servo_0')>SET</button></td>";
-  content += "</tr>";
-  content += "<tr>";
-  content += "<td>D05<br/><input type=text id=servo_5 value=\"" + servo5ValStr + "\"><button type=button onclick=saveServo(5,'servo_5')>SET</button></td>";
-  content += "<td>D12<br/><input type=text id=servo_1 value=\"" + servo1ValStr + "\"><button type=button onclick=saveServo(1,'servo_1')>SET</button></td>";
-  content += "</tr>";
-  content += "<tr>";
-  content += "<td>D04<br/><input type=text id=servo_6 value=\"" + servo6ValStr + "\"><button type=button onclick=saveServo(6,'servo_6')>SET</button></td>";
-  content += "<td>D13<br/><input type=text id=servo_2 value=\"" + servo2ValStr + "\"><button type=button onclick=saveServo(2,'servo_2')>SET</button></td>";
-  content += "</tr>";
-  content += "<tr>";
-  content += "<td>D02<br/><input type=text id=servo_7 value=\"" + servo7ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(7,'servo_7')>SET</button></td>";
-  content += "<td>D15<br/><input type=text id=servo_3 value=\"" + servo3ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(3,'servo_3')>SET</button></td>";
-  content += "</tr>";
-  content += "<!--<tr>";
-  content += "<td colspan=2><button type=button style=background:#FFBFBF onclick=saveServo(100,0)>RESET ALL</button></td>";
-  content += "</tr>-->";
-  content += "</table>";
-  content += "</body>";
-  content += "<script>";
-  content += "function saveServo(id, textId) {";
-  content += "var xhttp = new XMLHttpRequest();";
-  content += "var value = \"0\";";
-  content += "if(id==100){";
-  content += "document.getElementById(\"servo_7\").value = \"0\";";
-  content += "document.getElementById(\"servo_6\").value = \"0\";";
-  content += "document.getElementById(\"servo_5\").value = \"0\";";
-  content += "document.getElementById(\"servo_4\").value = \"0\";";
-  content += "document.getElementById(\"servo_3\").value = \"0\";";
-  content += "document.getElementById(\"servo_2\").value = \"0\";";
-  content += "document.getElementById(\"servo_1\").value = \"0\";";
-  content += "document.getElementById(\"servo_0\").value = \"0\";";
-  content += "}else{";
-  content += "value = document.getElementById(textId).value;";
-  content += "}";
-  content += "xhttp.onreadystatechange = function() {";
-  content += "if (xhttp.readyState == 4 && xhttp.status == 200) {";
-  content += "document.getElementById(\"demo\").innerHTML = xhttp.responseText;";
-  content += "}";
-  content += "};";
-  content += "xhttp.open(\"GET\",\"save?key=\"+id+\"&value=\"+value, true);";
-  content += "xhttp.send();";
-  content += "}";
-  content += "</script>";
-  content += "</html>";
-
-  server.send(200, "text/html", content);
-}
-
-// Motion editor
-void handleEditor()
-{
-  String content = "";
-
-  content += "<html>";
-  content += "<head>";
-  content += "<title>Motion editor</title>";
-  content += "<meta charset=UTF-8>";
-  content += "<meta name=viewport content=width=device-width>";
-  content += "<style type=text/css>";
-  content += "body {";
-  content += "margin: 0px;";
-  content += "backgound-color: #FFFFFF;";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 100%;";
-  content += "color: #555555;";
-  content += "}";
-  content += "td {";
-  content += "text-align: center;";
-  content += "}";
-  content += "span {";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 70%;";
-  content += "color: #777777;";
-  content += "}";
-  content += "input[type=range] {";
-  content += "-webkit-appearance: none;";
-  content += "background-color: #CCCCCC;";
-  content += "width: 70%;";
-  content += "height: 20px;";
-  content += "}";
-  content += "input[type=range]::-webkit-slider-thumb {";
-  content += "-webkit-appearance: none;";
-  content += "background-color: #4DA6FF;";
-  content += "opacity: 0.9;";
-  content += "width: 12px;";
-  content += "height: 20px;";
-  content += "}";
-  content += "input[type=text] {";
-  content += "width: 40%;";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 90%;";
-  content += "color: #555555;";
-  content += "text-align: center;";
-  content += "padding: 3px 3px 3px 3px;";
-  content += "}";
-  content += "button {";
-  content += "width: 40%;";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 90%;";
-  content += "color: #555555;";
-  content += "padding: 5px 5px 5px 5px;";
-  content += "border: none;";
-  content += "}";
-  content += "</style>";
-  content += "</head>";
-  content += "<body onload='actionCode()'>";
-  content += "<br>";
-  content += "<table width=100% height=90%>";
-
-  content += "<tr>";
-  content += "<td width=50%>D16 <span>Default 110<br>⬇ 135 <input type=range id=range_4 min=45 max=135 value=110 style=direction:rtl onchange=controlServo(4,'range_4')> 45 ⬆</span>";
-  content += "<br><input type=text id=servo_4 value=110> <button type=button style=background:#FFE599 onclick=controlServo(4,'servo_4')>Send</button></td>";
-  content += "<td width=50%>D14 <span>Default 70<br>⬆ 135 <input type=range id=range_0 min=45 max=135 value=70 style=direction:rtl onchange=controlServo(0,'range_0')> 45 ⬇</span>";
-  content += "<br><input type=text id=servo_0 value=70> <button type=button style=background:#FFE599 onclick=controlServo(0,'servo_0')>Send</button></td>";
-  content += "</tr>";
-
-  content += "<tr><td colspan=4><span><br></span></td></tr>";
-
-  content += "<tr>";
-  content += "<td>D05 <span>Default 90<br>◀ 135 <input type=range id=range_5 min=45 max=135 value=90 style=direction:rtl onchange=controlServo(5,'range_5')> 45 ▶</span>";
-  content += "<br><input type=text id=servo_5 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(5,'servo_5')>Send</button></td>";
-  content += "<td>D12 <span>Default 90<br>◀ 135 <input type=range id=range_1 min=45 max=135 value=90 style=direction:rtl onchange=controlServo(1,'range_1')> 45 ▶</span>";
-  content += "<br><input type=text id=servo_1 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(1,'servo_1')>Send</button></td>";
-  content += "</tr>";
-
-  content += "<tr><td colspan=4><span><br></span></td></tr>";
-
-  content += "<tr>";
-  content += "<td>D04 <span>Default 90<br>◀ 45 <input type=range id=range_6 min=45 max=135 value=90 onchange=controlServo(6,'range_6')> 135 ▶</span>";
-  content += "<br><input type=text id=servo_6 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(6,'servo_6')>Send</button></td>";
-  content += "<td>D13 <span>Default 90<br>◀ 45 <input type=range id=range_2 min=45 max=135 value=90 onchange=controlServo(2,'range_2')> 135 ▶</span>";
-  content += "<br><input type=text id=servo_2 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(2,'servo_2')>Send</button></td>";
-  content += "</tr>";
-
-  content += "<tr><td colspan=4><span><br></span></td></tr>";
-
-  content += "<tr>";
-  content += "<td>D02 <span>Default 70<br>⬇ 45 <input type=range id=range_7 min=45 max=135 value=70 onchange=controlServo(7,'range_7')> 135 ⬆</span>";
-  content += "<br><input type=text id=servo_7 value=70> <button type=button style=background:#FFE599 onclick=controlServo(7,'servo_7')>Send</button></td>";
-  content += "<td>D15 <span>Default 110<br>⬆ 45 <input type=range id=range_3 min=45 max=135 value=110 onchange=controlServo(3,'range_3')> 135 ⬇</span>";
-  content += "<br><input type=text id=servo_3 value=110> <button type=button style=background:#FFE599 onclick=controlServo(3,'servo_3')>Send</button></td>";
-  content += "</tr>";
-
-  content += "<tr>";
-  content += "<td colspan=4><br><span>Action Code:<br><output id=actionCode></output></span></font></td>";
-  content += "</tr>";
-  content += "<tr><td colspan=4><span><br></span></td></tr>";
-  content += "<tr>";
-  content += "<td colspan=2><button type=button style=background:#FFCC99 onclick=controlPm(1)>Standby</button></td>";
-  content += "</tr>";
-  content += "</body>";
-  content += "<script>";
-  content += "function controlServo(id, textId) {";
-  content += "var xhttp = new XMLHttpRequest();";
-  content += "var value = document.getElementById(textId).value;";
-  content += "document.querySelector('#range_' + id).value = value;";
-  content += "document.querySelector('#servo_' + id).value = value;";
-  content += "actionCode();";
-  content += "xhttp.onreadystatechange = function() {";
-  content += "if (xhttp.readyState == 4 && xhttp.status == 200) {";
-  content += "document.getElementById(\"demo\").innerHTML = xhttp.responseText;";
-  content += "}";
-  content += "};";
-  content += "xhttp.open(\"GET\",\"controller?servo=\"+id+\"&value=\"+value, true);";
-  content += "xhttp.send();";
-  content += "}";
-  content += "function controlPm(value) {";
-  content += "var xhttp = new XMLHttpRequest();";
-  content += "xhttp.onreadystatechange = function() {";
-  content += "if (xhttp.readyState == 4 && xhttp.status == 200) {";
-  content += "document.getElementById(\"demo\").innerHTML = xhttp.responseText;";
-  content += "}";
-  content += "};";
-  content += "xhttp.open(\"GET\", \"controller?pm=\"+value, true);";
-  content += "xhttp.send();";
-  content += "}";
-  content += "function actionCode() {";
-  content += "document.querySelector('#actionCode').value =";
-  content += "document.getElementById('servo_0').value + ', '";
-  content += "+ document.getElementById('servo_1').value + ', '";
-  content += "+ document.getElementById('servo_2').value + ', '";
-  content += "+ document.getElementById('servo_3').value + ', '";
-  content += "+ document.getElementById('servo_4').value + ', '";
-  content += "+ document.getElementById('servo_5').value + ', '";
-  content += "+ document.getElementById('servo_6').value + ', '";
-  content += "+ document.getElementById('servo_7').value;";
-  content += "}";
-  content += "</script>";
-  content += "</html>";
-
-  server.send(200, "text/html", content);
-}
-
-// Main controller
 void handleIndex()
 {
   String content = "";
@@ -899,7 +466,8 @@ void handleIndex()
   content += "font-size: 100%;";
   content += "color: #555555;";
   content += "background: #BFDFFF;";
-  content += "padding: 5px 5px 5px 5px;";
+  content += "border-radius: 4px;";
+  content += "padding: 2px 2px 2px 2px;";
   content += "border: none;";
   content += "}";
   content += "</style>";
@@ -944,104 +512,204 @@ void handleIndex()
   content += "xhttp.open(\"GET\", \"controller?pm=\"+id, true);";
   content += "xhttp.send();";
   content += "}";
-  content += "function controlPms(id) {";
-  content += "var xhttp = new XMLHttpRequest();";
-  content += "xhttp.onreadystatechange = function() {";
-  content += "if (xhttp.readyState == 4 && xhttp.status == 200) {";
-  content += "}";
-  content += "};";
-  content += "xhttp.open(\"GET\", \"controller?pms=\"+id, true);";
-  content += "xhttp.send();";
-  content += "}";
   content += "</script>";
   content += "</html>";
 
   server.send(200, "text/html", content);
 }
+/* SERVER CODE END */
 
-void setup() {
+/* MOTOR CODE START */
+void Set_PWM_to_Servo(int iServo, int iValue)
+{
+  /* 0 = zero degree 550 = 180 degree*/
+  ledcWrite(iServo,((Running_Servo_POS[iServo]*500.0/180)+50));
+  delay(100);
+}
+
+void Servo_PROGRAM_Zero()
+{
+  // 清除備份目前馬達數值
+  for (int Index = 0; Index < ALLMATRIX; Index++) {
+    Running_Servo_POS[Index] = Servo_Act_0[Index];
+  }
+
+  // 重新載入馬達預設數值
+  for (int iServo = 0; iServo < ALLSERVOS; iServo++) {
+    Set_PWM_to_Servo(iServo,Running_Servo_POS[iServo]);
+  }
+}
+
+void Servo_PROGRAM_Run(int iMatrix[][ALLMATRIX], int iSteps)
+{
+  int INT_TEMP_A, INT_TEMP_B, INT_TEMP_C;
+
+  for (int MainLoopIndex = 0; MainLoopIndex < iSteps; MainLoopIndex++) { // iSteps 步驟主迴圈
+
+    int InterTotalTime = iMatrix[MainLoopIndex][ALLMATRIX - 1]; // InterTotalTime 此步驟總時間
+
+    int InterDelayCounter = InterTotalTime / BASEDELAYTIME; // InterDelayCounter 此步驟基本延遲次數
+
+    for (int InterStepLoop = 0; InterStepLoop < InterDelayCounter; InterStepLoop++) { // 內差次數迴圈
+
+      for (int ServoIndex = 0; ServoIndex < ALLSERVOS; ServoIndex++) { // 馬達主迴圈
+
+        INT_TEMP_A = Running_Servo_POS[ServoIndex]; // 馬達現在位置
+        INT_TEMP_B = iMatrix[MainLoopIndex][ServoIndex]; // 馬達目標位置
+
+        if (INT_TEMP_A == INT_TEMP_B) { // 馬達數值不變
+          INT_TEMP_C = INT_TEMP_B;
+        } else if (INT_TEMP_A > INT_TEMP_B) { // 馬達數值減少
+          INT_TEMP_C =  map(BASEDELAYTIME * InterStepLoop, 0, InterTotalTime, 0, INT_TEMP_A - INT_TEMP_B); // PWM內差值 = map(執行次數時間累加, 開始時間, 結束時間, 內差起始值, 內差最大值)
+          if (INT_TEMP_A - INT_TEMP_C >= INT_TEMP_B) {
+            Serial.print(F("ServoIndex: "));
+            Serial.print(ServoIndex); 
+            Serial.print(F("INT_TEMP_A - INT_TEMP_C: "));
+            Serial.println(INT_TEMP_A - INT_TEMP_C); 
+            Set_PWM_to_Servo(ServoIndex, INT_TEMP_A - INT_TEMP_C);
+          }
+        } else if (INT_TEMP_A < INT_TEMP_B) { // 馬達數值增加
+          INT_TEMP_C =  map(BASEDELAYTIME * InterStepLoop, 0, InterTotalTime, 0, INT_TEMP_B - INT_TEMP_A); // PWM內差值 = map(執行次數時間累加, 開始時間, 結束時間, 內差起始值, 內差最大值)
+          if (INT_TEMP_A + INT_TEMP_C <= INT_TEMP_B) {
+            Serial.print(F("ServoIndex: "));
+            Serial.print(ServoIndex); 
+            Serial.print(F("INT_TEMP_A - INT_TEMP_C: "));
+            Serial.println(INT_TEMP_A + INT_TEMP_C); 
+            Set_PWM_to_Servo(ServoIndex, INT_TEMP_A + INT_TEMP_C);
+          }
+        }
+
+      }
+
+      delay(BASEDELAYTIME);
+    }
+
+    // 備份目前馬達數值
+    for (int Index = 0; Index < ALLMATRIX; Index++) {
+      Running_Servo_POS[Index] = iMatrix[MainLoopIndex][Index];
+    }
+  }
+}
+/* MOTOR CODE END */
+
+void setup()
+{
   Serial.begin(115200);
-  WiFi.softAP(ssid, password);
+  WiFi.softAP(ssid);
   WiFi.softAPConfig(local_ip, gateway, subnet);
   delay(100);
   if(!MDNS.begin("esp32")) {
      Serial.println("Error starting mDNS");
      return;
   }
-  server.on("/", handleIndex);
+  server.on("/",handleIndex);
   server.on("/controller", handleController);
-  server.on("/save", handleSave);
-  server.on("/editor", handleEditor);
   server.on("/zero", handleZero);
-  server.on("/setting", handleSetting);
-  server.on("/online", handleOnLine);
+  // server.on("/led", );
 
   server.begin();
   Serial.println("HTTP server started");
   MDNS.addService("http", "tcp", 80);
+
+  motorInit();
+  Servo_PROGRAM_Zero();
+
+  ws2812fx.init();
+  ws2812fx.setBrightness(1);
+  ws2812fx.setSegment(0, 0,LED_COUNT, FX_MODE_CUSTOM,  RED, 500, false);
+  ws2812fx.setCustomMode(myCustomEffect);
+  ws2812fx.start();
 }
 
-void loop() {
+void loop() 
+{
   server.handleClient();
 
   if (Servo_PROGRAM >= 1 ) {
     switch (Servo_PROGRAM) {
       case 1: // Standby 待機
-        // Servo_PROGRAM_Run(Servo_Prg_1, Servo_Prg_1_Step);
+        Serial.println("Standby Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_1, Servo_Prg_1_Step);
         break;
       case 2: // Forward 前行
-        // Servo_PROGRAM_Run(Servo_Prg_2, Servo_Prg_2_Step);
+        Serial.println("Forward Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_2, Servo_Prg_2_Step);
         break;
       case 3: // Backward 退後
-        // Servo_PROGRAM_Run(Servo_Prg_3, Servo_Prg_3_Step);
+        Serial.println("Backward Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_3, Servo_Prg_3_Step);
         break;
       case 4: // Left shift 左移
-        // Servo_PROGRAM_Run(Servo_Prg_4, Servo_Prg_4_Step);
+        Serial.println("Left shift Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_4, Servo_Prg_4_Step);
         break;
       case 5: // Right shift 右移
-        // Servo_PROGRAM_Run(Servo_Prg_5, Servo_Prg_5_Step);
+        Serial.println("Right shift Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_5, Servo_Prg_5_Step);
         break;
       case 6: // Turn left 左轉
-        // Servo_PROGRAM_Run(Servo_Prg_6, Servo_Prg_6_Step);
+        Serial.println("Turn left Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_6, Servo_Prg_6_Step);
         break;
       case 7: // Turn right 右轉
-        // Servo_PROGRAM_Run(Servo_Prg_7, Servo_Prg_7_Step);
+        Serial.println("Turn right Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_7, Servo_Prg_7_Step);
         break;
       case 8: // Lie 趴地
-        // Servo_PROGRAM_Run(Servo_Prg_8, Servo_Prg_8_Step);
+        Serial.println("Lie Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_8, Servo_Prg_8_Step);
         break;
       case 9: // Say Hi 打招呼
-        // Servo_PROGRAM_Run(Servo_Prg_9, Servo_Prg_9_Step);
-        // Servo_PROGRAM_Run(Servo_Prg_1, Servo_Prg_1_Step);
+        Serial.println("Say Hi Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_9, Servo_Prg_9_Step);
+        Servo_PROGRAM_Run(Servo_Prg_1, Servo_Prg_1_Step);
         break;
       case 10: // Fighting 戰鬥姿態
-        // Servo_PROGRAM_Run(Servo_Prg_10, Servo_Prg_10_Step);
+        Serial.println("Fighting Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_10, Servo_Prg_10_Step);
         break;
       case 11: // Push up 掌上壓
-        // Servo_PROGRAM_Run(Servo_Prg_11, Servo_Prg_11_Step);
+        Serial.println("Push up Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_11, Servo_Prg_11_Step);
         break;
       case 12: // Sleep 睡眠姿勢
-        // Servo_PROGRAM_Run(Servo_Prg_1, Servo_Prg_1_Step);
-        // Servo_PROGRAM_Run(Servo_Prg_12, Servo_Prg_12_Step);
+        Serial.println("Sleep Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_1, Servo_Prg_1_Step);
+        Servo_PROGRAM_Run(Servo_Prg_12, Servo_Prg_12_Step);
         break;
       case 13: // 舞步 1
-        // Servo_PROGRAM_Run(Servo_Prg_13, Servo_Prg_13_Step);
+        Serial.println("Dance 1 Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_13, Servo_Prg_13_Step);
         break;
       case 14: // 舞步 2
-        // Servo_PROGRAM_Run(Servo_Prg_14, Servo_Prg_14_Step);
+        Serial.println("Dance 2 Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_14, Servo_Prg_14_Step);
         break;
       case 15: // 舞步 3
-        // Servo_PROGRAM_Run(Servo_Prg_15, Servo_Prg_15_Step);
-        break;
-      case 99: // 待機
-        // Servo_PROGRAM_Center();
-        // delay(300);
+        Serial.println("Dance 3 Button Pressed.");
+        Servo_PROGRAM_Run(Servo_Prg_15, Servo_Prg_15_Step);
         break;
       case 100: // 歸零姿勢
-        // Servo_PROGRAM_Zero();
-        // delay(300);
+        Serial.println("Zero");
+        Servo_PROGRAM_Zero();
+        delay(300);
         break;
     }
     Servo_PROGRAM = 0;
   }
+
+  ws2812fx.service();
+}
+
+uint16_t myCustomEffect(void) { // random chase
+  WS2812FX::Segment* seg = ws2812fx.getSegment(); // get the current segment
+  for(uint16_t i=seg->stop; i>seg->start; i--) {
+    ws2812fx.setPixelColor(i, ws2812fx.getPixelColor(i-1));
+  }
+  uint32_t color = ws2812fx.getPixelColor(seg->start + 1);
+  int r = random(6) != 0 ? (color >> 16 & 0xFF) : random(256);
+  int g = random(6) != 0 ? (color >> 8  & 0xFF) : random(256);
+  int b = random(6) != 0 ? (color       & 0xFF) : random(256);
+  ws2812fx.setPixelColor(seg->start, r, g, b);
+  return seg->speed; // return the delay until the next animation step (in msec)
 }
