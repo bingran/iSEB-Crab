@@ -2,6 +2,10 @@
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <WS2812FX.h>
+#include <Preferences.h>
+
+/* To store the calibration value for each servo motor */
+Preferences preferences;
 
 /* led DECLARATION START */
 #define LED_COUNT 8
@@ -63,33 +67,31 @@ const int BASEDELAYTIME = 50; // 10 ms
 int Running_Servo_POS [ALLMATRIX] = {};
 
 // Servo zero position 歸零位置
-// int Servo_Act_0 [ ] PROGMEM = {  30,  20, 20,  150,  90, 90,  90, 90,  500  };
 int Servo_Act_0 [ ] PROGMEM = {  90,  90, 90,  90,  90, 90, 90, 90,  500  };
-// int Servo_Act_0 [ ] PROGMEM = {  20,  20, 20,  20,  150, 150,  150, 150,  500  };
-// int Servo_Act_0 [ ] PROGMEM = {  180,  180, 180,  180,  180, 180,  180, 180,  500  };
 
 // Standby 待機
-int Servo_Prg_1_Step = 2;
+int Servo_Prg_1_Step = 1;
 int Servo_Prg_1 [][ALLMATRIX] PROGMEM = {
-  {   90,  90,  90,  90,  90,  90,  90,  90,  500  }, // servo center point
-  {   70,  110,  70, 110, 90,  90,  90,  90,  500  }, // standby
+  //  ARM1, ARM2, ARM3, ARM4, LEG1, LEG2, LEG3, LEG4, ms
+  {     90,   90,    90,   90,  155,   15,   15,  155, 500  }, // servo center point
 };
 
 // Forward 前行
-int Servo_Prg_2_Step = 11;
+int Servo_Prg_2_Step = 12;
 int Servo_Prg_2 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // standby
-  {   90,  45,  90, 110, 110,  90,  90,  90,  100  }, // leg4,1 up; leg1 fw
-  {   70,  45,  90, 110, 110,  90,  90,  70,  100  }, // leg4,1 dn
-  {   70,  45,  90,  90,  90,  90,  90,  70,  100  }, // leg3,2 up
-  {   70,  90,  90,  90,  90, 135,  45,  70,  100  }, // leg4,1 bk; leg3 fw
-  {   70,  90,  90, 110, 110, 135,  45,  70,  100  }, // leg3,2 dn
-  {   90,  90,  90, 110, 110, 135,  90,  90,  100  }, // leg4,1 up; leg4 fw
-  {   90,  90, 135, 110, 110,  90,  90,  90,  100  }, // leg3,1 bk
-  {   70,  90, 135, 110, 110,  90,  90,  70,  100  }, // leg4,1 dn
-  {   70,  90, 135,  90, 110,  90,  90,  70,  100  }, // leg2 up
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // leg2 fw dn
+ //  ARM1, ARM2, ARM3, ARM4, LEG1, LEG2, LEG3, LEG4, ms
+  {    90,   90,   90,   90,  155,   15,   15,  155, 500  }, // standby
+  {   135,   90,   90,   90,  135,   15,   15,  155, 500  }, // leg4,1 up; leg1 fw
+  {   135,   90,   90,  110,  155,   15,   15,  155, 500  }, // leg4,1 dn
+  {   135,   90,   90,  110,  155,   60,   15,  135, 500  }, // leg3,2 up
+  {    90,   90,  135,  110,  155,   60,   60,  135, 500  }, // leg4,1 bk; leg3 fw
+  {    90,   90,  135,  110,  155,   15,   60,  155, 500  }, // leg3,2 dn
+  {    90,   90,   90,   90,  135,   15,   60,  155, 500  }, // leg4,1 up; leg4 fw
+  {    90,   45,   90,   90,  135,   15,   15,  155, 500  }, // leg3,1 bk
+  {    90,   45,   90,  110,  155,   15,   15,  155, 500  }, // leg4,1 dn
+  {    90,   45,   90,  110,  155,   15,   15,  135, 500  }, // leg2 up
+  {    90,   90,   90,  110,  155,   15,   15,  155, 500  }, // leg2 fw dn
+  {    90,   90,   90,   90,  155,   15,   15,  155, 500  }, // standby
 };
 
 // Backward 退後
@@ -110,20 +112,22 @@ int Servo_Prg_3 [][ALLMATRIX] PROGMEM = {
 };
 
 // Left shift 左移
-int Servo_Prg_4_Step = 11;
+int Servo_Prg_4_Step = 12;
 int Servo_Prg_4 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // standby
-  {   70,  90,  90,  90,  90,  45,  90,  70,  100  }, // leg2,3 up; leg3 fw
-  {   70,  90,  90, 110, 110,  45,  90,  70,  100  }, // leg2,3 dn
-  {   90,  90,  90, 110, 110,  45,  90,  90,  100  }, // leg4,1 up
-  {   90,  90,  45, 110, 110,  90, 135,  90,  100  }, // leg2,3 bk; leg4 fw
-  {   70,  90,  45, 110, 110,  90, 135,  70,  100  }, // leg4,1 dn
-  {   70,  90,  90,  90,  90,  90, 135,  70,  100  }, // leg2,3 up; leg2 fw
-  {   70, 135,  90,  90,  90,  90,  90,  70,  100  }, // leg4,1 bk
-  {   70, 135,  90, 110, 110,  90,  90,  70,  100  }, // leg2,3 dn
-  {   90, 135,  90, 110, 110,  90,  90,  70,  100  }, // leg1 up
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // leg1 fw dn
+  //  ARM1, ARM2, ARM3, ARM4, LEG1, LEG2, LEG3,LEG4,  ms
+  //   P05,  P04,  P12,  P13,  P16,  P02,  P14, P00,  ms
+  {     90,   90,   90,   90,  155,   15,   15,  155, 500  }, // standby
+  {     90,   90,   90,   90,  155,   90,   45,  90,  100  }, // leg2,3 up; leg3 fw
+  {     90,   90,   90,   90,  155,  110,   45, 110,  100  }, // leg2,3 dn
+  {     90,   90,   90,  110,  135,  110,   45, 110,  100  }, // leg4,1 up
+  {     90,   45,  135,  110,  135,  110,   90, 110,  100  }, // leg2,3 bk; leg4 fw
+  {     90,   45,  135,   90,   70,  110,   90, 110,  100  }, // leg4,1 dn
+  {     90,   90,  135,   90,   70,   90,   90,  90,  100  }, // leg2,3 up; leg2 fw
+  {    135,   90,   90,   90,   70,   90,   90,  90,  100  }, // leg4,1 bk
+  {    135,   90,   90,   90,   70,  110,   90, 110,  100  }, // leg2,3 dn
+  {    135,   90,   90,   90,   90,  110,   90, 110,  100  }, // leg1 up
+  {     90,   90,   90,   90,   70,  110,   90, 110,  100  }, // leg1 fw dn
+  {     90,   90,   90,   90,  155,   15,   15,  155, 500  }, // standby
 };
 
 // Right shift 右移
@@ -172,10 +176,10 @@ int Servo_Prg_7 [][ALLMATRIX] PROGMEM = {
 };
 
 // Lie 趴地
-int Servo_Prg_8_Step = 1;
+int Servo_Prg_8_Step = 2;
 int Servo_Prg_8 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {  110,  90,  90,  70,  70,  90,  90, 110,  500  }, // leg1,4 up
+  {     90,   90,    90,   90,  155,   15,   15,  155, 200  }, // servo center point
+  {     90,   90,    90,   90,  116,   63,   63,  116, 500  }, // leg1,4 up
 };
 
 // Say Hi 打招呼
@@ -208,26 +212,25 @@ int Servo_Prg_10 [][ALLMATRIX] PROGMEM = {
 // Push up 掌上壓
 int Servo_Prg_11_Step = 11;
 int Servo_Prg_11 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   70,  90,  90, 110, 110,  90,  90,  70,  300  }, // start
-  {  100,  90,  90,  80,  80,  90,  90, 100,  400  }, // down
-  {   70,  90,  90, 110, 110,  90,  90,  70,  500  }, // up
-  {  100,  90,  90,  80,  80,  90,  90, 100,  600  }, // down
-  {   70,  90,  90, 110, 110,  90,  90,  70,  700  }, // up
-  {  100,  90,  90,  80,  80,  90,  90, 100, 1300  }, // down
-  {   70,  90,  90, 110, 110,  90,  90,  70, 1800  }, // up
-  {  135,  90,  90,  45,  45,  90,  90, 135,  200  }, // fast down
-  {   70,  90,  90,  45,  60,  90,  90, 135,  500  }, // leg1 up
-  {   70,  90,  90,  45, 110,  90,  90, 135,  500  }, // leg2 up
-  {   70,  90,  90, 110, 110,  90,  90,  70,  500  }  // leg3, leg4 up
+  //  ARM1, ARM2,  ARM3, ARM4, LEG1, LEG2, LEG3, LEG4,  ms
+  {     90,   90,    90,   90,  155,   15,   15,  155, 200  }, // start
+  {     90,   90,    90,   90,  116,   63,   63,  116, 300  }, // down
+  {     90,   90,    90,   90,  155,   15,   15,  155, 400  }, // up
+  {     90,   90,    90,   90,  116,   63,   63,  116, 500  }, // down
+  {     90,   90,    90,   90,  155,   15,   15,  155, 600  }, // up
+  {     90,   90,    90,   90,  116,   63,   63,  116, 700  }, // down
+  {     90,   90,    90,   90,  155,   15,   15,  155, 1300 }, // up
+  {     90,   90,    90,   90,  116,   63,   63,  116, 200  },  // down
+  {     90,   90,    90,   90,  155,   63,   63,  116, 300  }, // leg 1 up
+  {     90,   90,    90,   90,  155,   15,   63,  116, 300  }, // leg 2 up
+  {     90,   90,    90,   90,  155,   15,   15,  155, 200  }, // leg3, leg4 up
 };
 
 // Sleep 睡眠姿勢
 int Servo_Prg_12_Step = 2;
 int Servo_Prg_12 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   30,  90,  90, 150, 150,  90,  90,  30,  200  }, // leg1,4 dn
-  {   30,  45, 135, 150, 150, 135,  45,  30,  200  }, // protect myself
+  {     90,   90,    90,   90,  155,   15,   15,  155, 200  }, // servo center point
+  {     55,   115,  115,   55,  155,   15,   15,  155, 500  }, // leg1,4 up
 };
 
 // 舞步 1
@@ -293,34 +296,158 @@ void motorInit()
   ledcSetup(LEG_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
  
   // Attach timer to a led pin
-  ledcAttachPin(12, ARM_1);  /* ARM 1 *//* CN1 */
-  ledcAttachPin(33, ARM_2);  /* ARM 2 *//* CN7 */
-  ledcAttachPin(15, ARM_3);  /* ARM 3 *//* CN9 */
-  ledcAttachPin(19, ARM_4);  /* ARM 4 *//* CN15 */
-  ledcAttachPin(13, LEG_1);  /* LEG 1 *//* CN2 */
-  ledcAttachPin(32, LEG_2);  /* LEG 2 *//* CN8 */
-  ledcAttachPin( 4, LEG_3);  /* LEG 3 *//* CN10 */
-  ledcAttachPin(23, LEG_4);  /* LEG 4 *//* CN16 */
+  ledcAttachPin(13, ARM_1);  /* ARM 1 *//* CN1  *//* PIN 13*/
+  delay(50);
+  ledcAttachPin(33, ARM_2);  /* ARM 2 *//* CN7  *//* PIN 33*/
+  delay(50);
+  ledcAttachPin(15, ARM_3);  /* ARM 3 *//* CN9  *//* PIN 15*/
+  delay(50);
+  ledcAttachPin(19, ARM_4);  /* ARM 4 *//* CN15 *//* PIN 19*/
+  delay(50);
+  ledcAttachPin(12, LEG_1);  /* LEG 1 *//* CN2  *//* PIN 12*/
+  delay(50);
+  ledcAttachPin(32, LEG_2);  /* LEG 2 *//* CN8  *//* PIN 32*/
+  delay(50);
+  ledcAttachPin( 4, LEG_3);  /* LEG 3 *//* CN10 *//* PIN  4*/
+  delay(50);
+  ledcAttachPin(23, LEG_4);  /* LEG 4 *//* CN16 *//* PIN 23*/
+  delay(50);
 
 }
 /* PWM CODE END */
 
 /* SERVER CODE START */
+// Servo calibration
+void handleSetting()
+{
+  double servo7Val = preferences.getDouble("7", 0);
+  String servo7ValStr = String(servo7Val);
+  double servo6Val = preferences.getDouble("6", 0);
+  String servo6ValStr = String(servo6Val);
+  double servo5Val = preferences.getDouble("5", 0);
+  String servo5ValStr = String(servo5Val);
+  double servo4Val = preferences.getDouble("4", 0);
+  String servo4ValStr = String(servo4Val);
+  double servo3Val = preferences.getDouble("3", 0);
+  String servo3ValStr = String(servo3Val);
+  double servo2Val = preferences.getDouble("2", 0);
+  String servo2ValStr = String(servo2Val);
+  double servo1Val = preferences.getDouble("1", 0);
+  String servo1ValStr = String(servo1Val);
+  double servo0Val = preferences.getDouble("0", 0);
+  String servo0ValStr = String(servo0Val);
+  String content = "";
+
+  content += "<html>";
+  content += "<head>";
+  content += "<title>Servo calibration</title>";
+  content += "<meta charset=UTF-8>";
+  content += "<meta name=viewport content=width=device-width>";
+  content += "<style type=text/css>";
+  content += "body {";
+  content += "margin: 0px;";
+  content += "backgound-color: #FFFFFF;";
+  content += "font-family: helvetica, arial;";
+  content += "font-size: 100%;";
+  content += "color: #555555;";
+  content += "}";
+  content += "td {";
+  content += "text-align: center;";
+  content += "}";
+  content += "span {";
+  content += "font-family: helvetica, arial;";
+  content += "font-size: 70%;";
+  content += "color: #777777;";
+  content += "}";
+  content += "input[type=text] {";
+  content += "width: 40%;";
+  content += "font-family: helvetica, arial;";
+  content += "font-size: 90%;";
+  content += "color: #555555;";
+  content += "text-align: center;";
+  content += "padding: 3px 3px 3px 3px;";
+  content += "}";
+  content += "button {";
+  content += "width: 40%;";
+  content += "font-family: helvetica, arial;";
+  content += "font-size: 90%;";
+  content += "color: #555555;";
+  content += "background: #BFDFFF;";
+  content += "padding: 5px 5px 5px 5px;";
+  content += "border: none;";
+  content += "}";
+  content += "</style>";
+  content += "</head>";
+  content += "<body>";
+  content += "<br>";
+  content += "<table width=100% height=90%>";
+  content += "<tr>";
+  content += "<td width=50%>ARM1<br/><input type=text id=servo_0 value=\"" + servo0ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(0,'servo_0')>SET</button></td>";
+  content += "<td width=50%>LEG1<br/><input type=text id=servo_4 value=\"" + servo4ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(4,'servo_4')>SET</button></td>";
+  content += "</tr>";
+  content += "<tr>";
+  content += "<td>ARM2<br/><input type=text id=servo_1 value=\"" + servo1ValStr + "\"><button type=button onclick=saveServo(1,'servo_1')>SET</button></td>";
+  content += "<td>LEG2<br/><input type=text id=servo_5 value=\"" + servo5ValStr + "\"><button type=button onclick=saveServo(5,'servo_15')>SET</button></td>";
+  content += "</tr>";
+  content += "<tr>";
+  content += "<td>ARM3<br/><input type=text id=servo_2 value=\"" + servo2ValStr + "\"><button type=button onclick=saveServo(2,'servo_2')>SET</button></td>";
+  content += "<td>LEG3<br/><input type=text id=servo_6 value=\"" + servo6ValStr + "\"><button type=button onclick=saveServo(6,'servo_6')>SET</button></td>";
+  content += "</tr>";
+  content += "<tr>";
+  content += "<td>ARM4<br/><input type=text id=servo_3 value=\"" + servo3ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(3,'servo_3')>SET</button></td>";
+  content += "<td>LEG4<br/><input type=text id=servo_7 value=\"" + servo7ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(7,'servo_7')>SET</button></td>";
+  content += "</tr>";
+  content += "<tr>";
+  content += "<td colspan=2><button type=button style=background:#FFBFBF onclick=saveServo(100,0)>RESET ALL</button></td>";
+  content += "</tr>";
+  content += "</table>";
+  content += "</body>";
+  content += "<script>";
+  content += "function saveServo(id, textId) {";
+  content += "var xhttp = new XMLHttpRequest();";
+  content += "var value = \"0\";";
+  content += "if(id==100){";
+  content += "document.getElementById(\"servo_7\").value = \"0\";";
+  content += "document.getElementById(\"servo_6\").value = \"0\";";
+  content += "document.getElementById(\"servo_5\").value = \"0\";";
+  content += "document.getElementById(\"servo_4\").value = \"0\";";
+  content += "document.getElementById(\"servo_3\").value = \"0\";";
+  content += "document.getElementById(\"servo_2\").value = \"0\";";
+  content += "document.getElementById(\"servo_1\").value = \"0\";";
+  content += "document.getElementById(\"servo_0\").value = \"0\";";
+  content += "}else{";
+  content += "value = document.getElementById(textId).value;";
+  content += "}";
+  content += "xhttp.onreadystatechange = function() {";
+  content += "if (xhttp.readyState == 4 && xhttp.status == 200) {";
+  content += "document.getElementById(\"demo\").innerHTML = xhttp.responseText;";
+  content += "}";
+  content += "};";
+  content += "xhttp.open(\"GET\",\"save?key=\"+id+\"&value=\"+value, true);";
+  content += "xhttp.send();";
+  content += "}";
+  content += "</script>";
+  content += "</html>";
+
+  server.send(200, "text/html", content);
+}
+
 void handleController()
 {
   String pm = server.arg("pm");
   String servo = server.arg("servo");
+  String value = server.arg("value");
   Serial.println("Controller pm: "+pm+" servo: "+servo);
   if (pm != "") {
     Servo_PROGRAM = pm.toInt();
+    server.send(200, "text/html", "(pm)=(" + pm + ")");
   }
 
-  if (servo != "") {
-    String ival = server.arg("value");
-    // Set_PWM_to_Servo(servo.toInt(), ival.toInt());
+  if (servo != "" && value!= "") {
+    Set_PWM_to_Servo(servo.toInt(),value.toInt());
+    server.send(200, "text/html", "servo =" + servo + " value =" + value);
   }
-
-  server.send(200, "text/html", "(pm)=(" + pm + ")");
+  server.send(200, "text/html", "Input invalid");
 }
 
 void handleOnLed()
@@ -517,14 +644,194 @@ void handleIndex()
 
   server.send(200, "text/html", content);
 }
+
+void handleSave()
+{
+  String key = server.arg("key");
+  String value = server.arg("value");
+  int keyInt = key.toInt();
+  double valueDouble = value.toDouble();
+  if(100 == keyInt){
+    preferences.putDouble("7", 0);
+    preferences.putDouble("6", 0);
+    preferences.putDouble("5", 0);
+    preferences.putDouble("4", 0);
+    preferences.putDouble("3", 0);
+    preferences.putDouble("2", 0);
+    preferences.putDouble("1", 0);
+    preferences.putDouble("0", 0);
+    
+    Serial.println("Reset all Done");
+  }
+  else{
+    preferences.putDouble(key.c_str(), valueDouble); // 儲存校正值
+    Serial.print(F("Servo: "));
+    Serial.print(key); 
+    Serial.print(F(" value: "));
+    Serial.println(value); 
+  }
+  server.send(200, "text/html", "(key, value)=(" + key + "," + value + ")");
+}
+
+void handleEditor()
+{
+  String content = "";
+
+  content += "<html>";
+  content += "<head>";
+  content += "<title>Motion editor</title>";
+  content += "<meta charset=UTF-8>";
+  content += "<meta name=viewport content=width=device-width>";
+  content += "<style type=text/css>";
+  content += "body {";
+  content += "margin: 0px;";
+  content += "backgound-color: #FFFFFF;";
+  content += "font-family: helvetica, arial;";
+  content += "font-size: 100%;";
+  content += "color: #555555;";
+  content += "}";
+  content += "td {";
+  content += "text-align: center;";
+  content += "}";
+  content += "span {";
+  content += "font-family: helvetica, arial;";
+  content += "font-size: 70%;";
+  content += "color: #777777;";
+  content += "}";
+  content += "input[type=range] {";
+  content += "-webkit-appearance: none;";
+  content += "background-color: #CCCCCC;";
+  content += "width: 70%;";
+  content += "height: 20px;";
+  content += "}";
+  content += "input[type=range]::-webkit-slider-thumb {";
+  content += "-webkit-appearance: none;";
+  content += "background-color: #4DA6FF;";
+  content += "opacity: 0.9;";
+  content += "width: 12px;";
+  content += "height: 20px;";
+  content += "}";
+  content += "input[type=text] {";
+  content += "width: 40%;";
+  content += "font-family: helvetica, arial;";
+  content += "font-size: 90%;";
+  content += "color: #555555;";
+  content += "text-align: center;";
+  content += "padding: 3px 3px 3px 3px;";
+  content += "}";
+  content += "button {";
+  content += "width: 40%;";
+  content += "font-family: helvetica, arial;";
+  content += "font-size: 90%;";
+  content += "color: #555555;";
+  content += "padding: 5px 5px 5px 5px;";
+  content += "border: none;";
+  content += "}";
+  content += "</style>";
+  content += "</head>";
+  content += "<body onload='actionCode()'>";
+  content += "<br>";
+  content += "<table width=100% height=90%>";
+
+  content += "<tr>";
+  content += "<td width=50%>ARM1 <span>Default 90<br>0 <input type=range id=range_0 min=0 max=180 value=90 onchange=controlServo(0,'range_0')> 180</span>";
+  content += "<br><input type=text id=servo_0 value=90> <button type=button style=background:#FFE599 onclick=controlServo(0,'servo_0')>Send</button></td>";
+  content += "<td width=50%>LEG1 <span>Default 90<br>0 <input type=range id=range_4 min=0 max=180 value=90 onchange=controlServo(4,'range_4')> 180</span>";
+  content += "<br><input type=text id=servo_4 value=90> <button type=button style=background:#FFE599 onclick=controlServo(4,'servo_4')>Send</button></td>";
+  content += "</tr>";
+
+  content += "<tr><td colspan=4><span><br></span></td></tr>";
+
+  content += "<tr>";
+  content += "<td>ARM2 <span>Default 90<br>0 <input type=range id=range_1 min=0 max=180 value=90 onchange=controlServo(1,'range_1')> 180</span>";
+  content += "<br><input type=text id=servo_1 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(1,'servo_1')>Send</button></td>";
+  content += "<td>LEG2 <span>Default 90<br>0 <input type=range id=range_5 min=0 max=180 value=90 onchange=controlServo(5,'range_5')> 180</span>";
+  content += "<br><input type=text id=servo_5 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(5,'servo_5')>Send</button></td>";
+  content += "</tr>";
+
+  content += "<tr><td colspan=4><span><br></span></td></tr>";
+
+  content += "<tr>";
+  content += "<td>ARM3 <span>Default 90<br>0 <input type=range id=range_2 min=0 max=180 value=90 onchange=controlServo(2,'range_2')> 180</span>";
+  content += "<br><input type=text id=servo_2 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(2,'servo_2')>Send</button></td>";
+  content += "<td>LEG3 <span>Default 90<br>0 <input type=range id=range_6 min=0 max=180 value=90 onchange=controlServo(6,'range_6')> 180</span>";
+  content += "<br><input type=text id=servo_6 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(6,'servo_6')>Send</button></td>";
+  content += "</tr>";
+
+  content += "<tr><td colspan=4><span><br></span></td></tr>";
+
+  content += "<tr>";
+  content += "<td>ARM4 <span>Default 90<br>0 <input type=range id=range_3 min=0 max=180 value=90 onchange=controlServo(3,'range_3')> 180</span>";
+  content += "<br><input type=text id=servo_3 value=110> <button type=button style=background:#FFE599 onclick=controlServo(3,'servo_3')>Send</button></td>";
+  content += "<td>LEG4 <span>Default 90<br>0 <input type=range id=range_7 min=0 max=180 value=90 onchange=controlServo(7,'range_7')> 180</span>";
+  content += "<br><input type=text id=servo_7 value=70> <button type=button style=background:#FFE599 onclick=controlServo(7,'servo_7')>Send</button></td>";
+  content += "</tr>";
+
+  content += "<tr>";
+  content += "<td colspan=4><br><span>Action Code:<br><output id=actionCode></output></span></font></td>";
+  content += "</tr>";
+  content += "<tr>";
+  content += "<td colspan=2><button type=button style=background:#FFCC99 onclick=controlPm(1)>Standby</button></td>";
+  content += "</tr>";
+  content += "</body>";
+  content += "<script>";
+  content += "function controlServo(id, textId) {";
+  content += "var xhttp = new XMLHttpRequest();";
+  content += "var value = document.getElementById(textId).value;";
+  content += "document.querySelector('#range_' + id).value = value;";
+  content += "document.querySelector('#servo_' + id).value = value;";
+  content += "actionCode();";
+  content += "xhttp.onreadystatechange = function() {";
+  content += "if (xhttp.readyState == 4 && xhttp.status == 200) {";
+  content += "document.getElementById(\"demo\").innerHTML = xhttp.responseText;";
+  content += "}";
+  content += "};";
+  content += "xhttp.open(\"GET\",\"controller?servo=\"+id+\"&value=\"+value, true);";
+  content += "xhttp.send();";
+  content += "}";
+  content += "function controlPm(value) {";
+  content += "var xhttp = new XMLHttpRequest();";
+  content += "xhttp.onreadystatechange = function() {";
+  content += "if (xhttp.readyState == 4 && xhttp.status == 200) {";
+  content += "document.getElementById(\"demo\").innerHTML = xhttp.responseText;";
+  content += "}";
+  content += "};";
+  content += "xhttp.open(\"GET\", \"controller?pm=\"+value, true);";
+  content += "xhttp.send();";
+  content += "}";
+  content += "function actionCode() {";
+  content += "document.querySelector('#actionCode').value =";
+  content += "document.getElementById('servo_0').value + ', '";
+  content += "+ document.getElementById('servo_1').value + ', '";
+  content += "+ document.getElementById('servo_2').value + ', '";
+  content += "+ document.getElementById('servo_3').value + ', '";
+  content += "+ document.getElementById('servo_4').value + ', '";
+  content += "+ document.getElementById('servo_5').value + ', '";
+  content += "+ document.getElementById('servo_6').value + ', '";
+  content += "+ document.getElementById('servo_7').value;";
+  content += "}";
+  content += "</script>";
+  content += "</html>";
+
+  server.send(200, "text/html", content);
+}
+
 /* SERVER CODE END */
 
 /* MOTOR CODE START */
 void Set_PWM_to_Servo(int iServo, int iValue)
 {
+  // 讀取 EEPROM 修正誤差
+  iValue = (iValue*MAX/180.0)+MIN;
+  double NewPWM = iValue + preferences.getDouble((String(iServo)).c_str(),0);
+  Serial.print(F("iServo: "));
+  Serial.print(iServo); 
+  Serial.print(F(" iValue: "));
+  Serial.print(iValue);
+  Serial.print(F(" NewPWM: "));
+  Serial.println(NewPWM); 
   /* 0 = zero degree 550 = 180 degree*/
-  ledcWrite(iServo,((Running_Servo_POS[iServo]*500.0/180)+50));
-  delay(100);
+  ledcWrite(iServo,NewPWM);
 }
 
 void Servo_PROGRAM_Zero()
@@ -537,6 +844,7 @@ void Servo_PROGRAM_Zero()
   // 重新載入馬達預設數值
   for (int iServo = 0; iServo < ALLSERVOS; iServo++) {
     Set_PWM_to_Servo(iServo,Running_Servo_POS[iServo]);
+    delay(50);
   }
 }
 
@@ -562,19 +870,11 @@ void Servo_PROGRAM_Run(int iMatrix[][ALLMATRIX], int iSteps)
         } else if (INT_TEMP_A > INT_TEMP_B) { // 馬達數值減少
           INT_TEMP_C =  map(BASEDELAYTIME * InterStepLoop, 0, InterTotalTime, 0, INT_TEMP_A - INT_TEMP_B); // PWM內差值 = map(執行次數時間累加, 開始時間, 結束時間, 內差起始值, 內差最大值)
           if (INT_TEMP_A - INT_TEMP_C >= INT_TEMP_B) {
-            Serial.print(F("ServoIndex: "));
-            Serial.print(ServoIndex); 
-            Serial.print(F("INT_TEMP_A - INT_TEMP_C: "));
-            Serial.println(INT_TEMP_A - INT_TEMP_C); 
             Set_PWM_to_Servo(ServoIndex, INT_TEMP_A - INT_TEMP_C);
           }
         } else if (INT_TEMP_A < INT_TEMP_B) { // 馬達數值增加
           INT_TEMP_C =  map(BASEDELAYTIME * InterStepLoop, 0, InterTotalTime, 0, INT_TEMP_B - INT_TEMP_A); // PWM內差值 = map(執行次數時間累加, 開始時間, 結束時間, 內差起始值, 內差最大值)
           if (INT_TEMP_A + INT_TEMP_C <= INT_TEMP_B) {
-            Serial.print(F("ServoIndex: "));
-            Serial.print(ServoIndex); 
-            Serial.print(F("INT_TEMP_A - INT_TEMP_C: "));
-            Serial.println(INT_TEMP_A + INT_TEMP_C); 
             Set_PWM_to_Servo(ServoIndex, INT_TEMP_A + INT_TEMP_C);
           }
         }
@@ -603,14 +903,18 @@ void setup()
      return;
   }
   server.on("/",handleIndex);
+  server.on("/editor", handleEditor);
   server.on("/controller", handleController);
   server.on("/zero", handleZero);
+  server.on("/setting",handleSetting);
+  server.on("/save", handleSave);
   // server.on("/led", );
 
   server.begin();
   Serial.println("HTTP server started");
   MDNS.addService("http", "tcp", 80);
 
+  delay(50);
   motorInit();
   Servo_PROGRAM_Zero();
 
@@ -619,6 +923,12 @@ void setup()
   ws2812fx.setSegment(0, 0,LED_COUNT, FX_MODE_CUSTOM,  RED, 500, false);
   ws2812fx.setCustomMode(myCustomEffect);
   ws2812fx.start();
+
+ // Open Preferences with my-app namespace. Each application module, library, etc
+  // has to use a namespace name to prevent key name collisions. We will open storage in
+  // RW-mode (second parameter has to be false).
+  // Note: Namespace name is limited to 15 chars.
+  preferences.begin("iSEBSpider", false);
 }
 
 void loop() 
