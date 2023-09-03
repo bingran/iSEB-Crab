@@ -28,14 +28,14 @@ unsigned long now = 0;
 #define MIN 50
 #define MAX 550
 
-#define ARM_1 0
-#define ARM_2 1
-#define ARM_3 2
-#define ARM_4 3
-#define LEG_1 4
-#define LEG_2 5
-#define LEG_3 6
-#define LEG_4 7
+#define FEMUR_1 0
+#define FEMUR_2 1
+#define FEMUR_3 2
+#define FEMUR_4 3
+#define CLAW_1 4
+#define CLAW_2 5
+#define CLAW_3 6
+#define CLAW_4 7
 /* PWM DECLARATION END */
 
 /* SERVER DECLARATION START */
@@ -61,223 +61,223 @@ const int ALLMATRIX = 9; // GPIO14 + GPIO12 + GPIO13 + GPIO15 + GPIO16 + GPIO5 +
 const int ALLSERVOS = 8; // GPIO14 + GPIO12 + GPIO13 + GPIO15 + GPIO16 + GPIO5 + GPIO4 + GPIO2
 
 // Servo delay base time
-const int BASEDELAYTIME = 50; // 10 ms
+const int BASEDELAYTIME = 20; // 10 ms
 
 // Backup servo value
 int Running_Servo_POS [ALLMATRIX] = {};
 
 // Servo zero position 歸零位置
-int Servo_Act_0 [ ] PROGMEM = {  90,  90, 90,  90,  90, 90, 90, 90,  500  };
+int Servo_Act_0 [ ] PROGMEM = {  90,  90, 90,  90,  15, 155, 155, 15,  500  };
 
 // Standby 待機
-int Servo_Prg_1_Step = 1;
-int Servo_Prg_1 [][ALLMATRIX] PROGMEM = {
-  //  ARM1, ARM2, ARM3, ARM4, LEG1, LEG2, LEG3, LEG4, ms
-  {     90,   90,    90,   90,  155,   15,   15,  155, 500  }, // servo center point
-};
+int Servo_Act_1 [ ] PROGMEM = {  90,  90, 90,  90,  70, 100, 100, 70,  500  };
 
 // Forward 前行
-int Servo_Prg_2_Step = 12;
+int Servo_Prg_2_Step = 11;
 int Servo_Prg_2 [][ALLMATRIX] PROGMEM = {
- //  ARM1, ARM2, ARM3, ARM4, LEG1, LEG2, LEG3, LEG4, ms
-  {    90,   90,   90,   90,  155,   15,   15,  155, 500  }, // standby
-  {   135,   90,   90,   90,  135,   15,   15,  155, 500  }, // leg4,1 up; leg1 fw
-  {   135,   90,   90,  110,  155,   15,   15,  155, 500  }, // leg4,1 dn
-  {   135,   90,   90,  110,  155,   60,   15,  135, 500  }, // leg3,2 up
-  {    90,   90,  135,  110,  155,   60,   60,  135, 500  }, // leg4,1 bk; leg3 fw
-  {    90,   90,  135,  110,  155,   15,   60,  155, 500  }, // leg3,2 dn
-  {    90,   90,   90,   90,  135,   15,   60,  155, 500  }, // leg4,1 up; leg4 fw
-  {    90,   45,   90,   90,  135,   15,   15,  155, 500  }, // leg3,1 bk
-  {    90,   45,   90,  110,  155,   15,   15,  155, 500  }, // leg4,1 dn
-  {    90,   45,   90,  110,  155,   15,   15,  135, 500  }, // leg2 up
-  {    90,   90,   90,  110,  155,   15,   15,  155, 500  }, // leg2 fw dn
-  {    90,   90,   90,   90,  155,   15,   15,  155, 500  }, // standby
+ //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4, ms
+  {  90,  90,  90,  90,  80,  85,  85, 80, 200  }, // standby
+  {  90,  90,  90,  50,  55,  85,  85, 60, 200  }, // CLAW1,4 up; FEMUR4 fw
+  {  90,  90,  90,  50,  80,  85,  85, 80, 200  }, // CLAW1,4 dn
+  {  90,  90,  90,  50,  80, 115, 115, 80, 200  }, // CLAW2,3 up
+  {  50, 120,  90,  90,  80, 115, 115, 80, 200  }, // FEMUR1,4 bk; FEMUR2 fw
+  {  50, 120,  90,  90,  80,  85,  85, 80, 200  }, // CLAW2,3 dn
+  {  50, 120,  90,  90,  55,  85,  85, 55, 200  }, // CLAW1,4 up; FEMUR1 fw
+  {  90,  90, 120,  90,  55,  85,  85, 55, 200  }, // FEMUR2,3 bk
+  {  90,  90, 120,  90,  80,  85,  85, 80, 200  }, // CLAW1,4 dn
+  {  90,  90, 120,  90,  80,  85, 115, 80, 200  }, // CLAW3 up 
+  {  90,  90,  90,  90,  80,  85,  85, 80, 200  }, // CLAW3 dn FEMUR3 fw
 };
 
-// Backward 退後
+	// Backward 退後
 int Servo_Prg_3_Step = 11;
 int Servo_Prg_3 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // standby
-  {   90,  90,  90, 110, 110,  90,  45,  90,  100  }, // leg1,4 up; leg4 fw
-  {   70,  90,  90, 110, 110,  90,  45,  70,  100  }, // leg1,4 dn
-  {   70,  90,  90,  90,  90,  90,  45,  70,  100  }, // leg2,3 up
-  {   70,  45, 135,  90,  90,  90,  90,  70,  100  }, // leg1,4 bk; leg2 fw
-  {   70,  45, 135, 110, 110,  90,  90,  70,  100  }, // leg2,3 dn
-  {   90,  90, 135, 110, 110,  90,  90,  90,  100  }, // leg1,4 up; leg1 fw
-  {   90,  90,  90, 110, 110, 135,  90,  90,  100  }, // leg2,3 bk
-  {   70,  90,  90, 110, 110, 135,  90,  70,  100  }, // leg1,4 dn
-  {   70,  90,  90, 110,  90, 135,  90,  70,  100  }, // leg3 up
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // leg3 fw dn
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4, ms
+  {   90,  90,  90,  90,  80,  85,  85, 80, 200  }, // standby
+  {   60,  90,  90,  90,  55,  85,  85, 50, 200  }, // CLAW4,1 up; FEMUR1 fw
+  {   60,  90,  90,  90,  80,  85,  85, 80, 200  }, // CLAW4,1 dn
+  {   60,  90,  90,  90,  80, 115, 115, 80, 200  }, // CLAW3,2 up
+  {   90,  90, 120,  60,  80, 115, 115, 80, 200  }, // FEMUR4,1 bk; FEMUR3 fw
+  {   90,  90, 120,  60,  80,  85,  85, 80, 200  }, // CLAW3,2 dn
+  {   90,  90, 120,  90,  55,  85,  85, 55, 200  }, // CLAW4,1 up; FEMUR4 fw
+  {   90, 120,  90,  90,  55,  85,  85, 55, 200  }, // FEMUR3,2 bk
+  {   90, 120,  90,  90,  80,  85,  85, 80, 200  }, // CLAW4,1 dn
+  {   90, 120,  90,  90,  80, 115,  85, 80, 200  }, // CLAW2 up FEMUR2 fw
+  {   90,  90,  90,  90,  80,  85,  85, 80, 200  }, // CLAW2 dn 
 };
 
 // Left shift 左移
-int Servo_Prg_4_Step = 12;
+int Servo_Prg_4_Step = 11;
 int Servo_Prg_4 [][ALLMATRIX] PROGMEM = {
-  //  ARM1, ARM2, ARM3, ARM4, LEG1, LEG2, LEG3,LEG4,  ms
-  //   P05,  P04,  P12,  P13,  P16,  P02,  P14, P00,  ms
-  {     90,   90,   90,   90,  155,   15,   15,  155, 500  }, // standby
-  {     90,   90,   90,   90,  155,   90,   45,  90,  100  }, // leg2,3 up; leg3 fw
-  {     90,   90,   90,   90,  155,  110,   45, 110,  100  }, // leg2,3 dn
-  {     90,   90,   90,  110,  135,  110,   45, 110,  100  }, // leg4,1 up
-  {     90,   45,  135,  110,  135,  110,   90, 110,  100  }, // leg2,3 bk; leg4 fw
-  {     90,   45,  135,   90,   70,  110,   90, 110,  100  }, // leg4,1 dn
-  {     90,   90,  135,   90,   70,   90,   90,  90,  100  }, // leg2,3 up; leg2 fw
-  {    135,   90,   90,   90,   70,   90,   90,  90,  100  }, // leg4,1 bk
-  {    135,   90,   90,   90,   70,  110,   90, 110,  100  }, // leg2,3 dn
-  {    135,   90,   90,   90,   90,  110,   90, 110,  100  }, // leg1 up
-  {     90,   90,   90,   90,   70,  110,   90, 110,  100  }, // leg1 fw dn
-  {     90,   90,   90,   90,  155,   15,   15,  155, 500  }, // standby
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // standby
+  {   90,  90,  45,  90,  80, 120, 120,  80, 300  }, // CLAW2,3 up; FEMUR3 fw
+  {   90,  90,  45,  90,  80,  85,  85,  80, 300  }, // CLAW2,3 dn
+  {   90,  90,  45,  90,  50,  85,  85,  50, 300  }, // CLAW4,1 up
+  {   90,  45,  90, 120,  50,  85,  85,  50, 300  }, // FEMUR2,3 bk; FEMUR4 fw
+  {   90,  45,  90, 120,  80,  85,  85,  80, 300  }, // CLAW4,1 dn
+  {   90,  90,  90, 120,  80, 120, 120,  80, 300  }, // CLAW2,3 up; FEMUR2 fw
+  {  120,  90,  90,  90,  80, 120, 120,  80, 300  }, // FEMUR4,1 bk
+  {  120,  90,  90,  90,  80,  85,  85,  80, 300  }, // CLAW2,3 dn
+  {  120,  90,  90,  90,  50,  85,  85,  80, 300  }, // CLAW1 up
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // FEMUR1 fw CLAW1 dn
 };
 
 // Right shift 右移
 int Servo_Prg_5_Step = 11;
 int Servo_Prg_5 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // standby
-  {   70,  90,  45,  90,  90,  90,  90,  70,  100  }, // leg3,2 up; leg2 fw
-  {   70,  90,  45, 110, 110,  90,  90,  70,  100  }, // leg3,2 dn
-  {   90,  90,  45, 110, 110,  90,  90,  90,  100  }, // leg1,4 up
-  {   90, 135,  90, 110, 110,  45,  90,  90,  100  }, // leg3,2 bk; leg1 fw
-  {   70, 135,  90, 110, 110,  45,  90,  70,  100  }, // leg1,4 dn
-  {   70, 135,  90,  90,  90,  90,  90,  70,  100  }, // leg3,2 up; leg3 fw
-  {   70,  90,  90,  90,  90,  90, 135,  70,  100  }, // leg1,4 bk
-  {   70,  90,  90, 110, 110,  90, 135,  70,  100  }, // leg3,2 dn
-  {   70,  90,  90, 110, 110,  90, 135,  90,  100  }, // leg4 up
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // leg4 fw dn
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // standby
+  {   90,  45,  90,  90,  80, 120, 120,  80, 300  }, // CLAW3,2 up; FEMUR2 fw
+  {   90,  45,  90,  90,  80,  85,  85,  80, 300  }, // CLAW3,2 dn
+  {   90,  45,  90,  90,  50,  85,  85,  50, 300  }, // CLAW1,4 up
+  {  120,  90,  45,  90,  50,  85,  85,  50, 300  }, // FEMUR3,2 bk; FEMUR1 fw
+  {  120,  90,  45,  90,  80,  85,  85,  80, 300  }, // CLAW1,4 dn
+  {  120,  90,  90,  90,  80, 120, 120,  80, 300  }, // CLAW3,2 up; FEMUR3 fw
+  {   90,  90,  90, 120,  80, 120, 120,  80, 300  }, // FEMUR1,4 bk
+  {   90,  90,  90, 120,  80,  85,  85,  80, 300  }, // CLAW3,2 dn
+  {   90,  90,  90, 120,  80,  85,  85,  50, 300  }, // CLAW4 up
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // FEMUR4 fw CLAW4 dn
+
 };
 
-// Turn left 左轉leg
+// Turn left 左轉
 int Servo_Prg_6_Step = 8;
 int Servo_Prg_6 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // standby
-  {   90,  90,  90, 110, 110,  90,  90,  90,  100  }, // leg1,4 up
-  {   90, 135,  90, 110, 110,  90, 135,  90,  100  }, // leg1,4 turn
-  {   70, 135,  90, 110, 110,  90, 135,  70,  100  }, // leg1,4 dn
-  {   70, 135,  90,  90,  90,  90, 135,  70,  100  }, // leg2,3 up
-  {   70, 135, 135,  90,  90, 135, 135,  70,  100  }, // leg2,3 turn
-  {   70, 135, 135, 110, 110, 135, 135,  70,  100  }, // leg2,3 dn
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // leg1,2,3,4 turn
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,ms
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // standby
+  {   90,  90,  90,  90,  50,  85,  85,  50, 300  }, // CLAW4,1 up
+  {  135,  90,  90, 135,  50,  85,  85,  50, 300  }, // FEMUR4,1 turn
+  {  135,  90,  90, 135,  80,  85,  85,  80, 300  }, // CLAW4,1 dn
+  {  135,  90,  90, 135,  80, 120, 120,  80, 300  }, // CLAW3,2 up
+  {  135, 135, 135, 135,  80, 120, 120,  80, 300  }, // FEMUR3,2 turn
+  {  135, 135, 135, 135,  80,  85,  85,  80, 300  }, // CLAW3,2 dn
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // FEMUR1,2,3,4 turn
 };
 
 // Turn right 右轉
 int Servo_Prg_7_Step = 8;
 int Servo_Prg_7 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // standby
-  {   70,  90,  90,  90,  90,  90,  90,  70,  100  }, // leg2,3 up
-  {   70,  90,  45,  90,  90,  45,  90,  70,  100  }, // leg2,3 turn
-  {   70,  90,  45, 110, 110,  45,  90,  70,  100  }, // leg2,3 dn
-  {   90,  90,  45, 110, 110,  45,  90,  90,  100  }, // leg1,4 up
-  {   90,  45,  45, 110, 110,  45,  45,  90,  100  }, // leg1,4 turn
-  {   70,  45,  45, 110, 110,  45,  45,  70,  100  }, // leg1,4 dn
-  {   70,  90,  90, 110, 110,  90,  90,  70,  100  }, // leg1,2,3,4 turn
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // standby
+  {   90,  90,  90,  90,  80, 120, 120,  80, 300  }, // CLAW3,2 up
+  {   90,  45,  45,  90,  80, 120, 120,  80, 300  }, // FEMUR3,2 turn
+  {   90,  45,  45,  90,  80,  85,  85,  80, 300  }, // CLAW3,2 dn
+  {   90,  45,  45,  90,  50,  85,  85,  50, 300  }, // CLAW4,1 up
+  {   45,  45,  45,  45,  50,  85,  85,  50, 300  }, // FEMUR4,1 turn
+  {   45,  45,  45,  45,  80,  85,  85,  80, 300  }, // CLAW4,1 dn
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // FEMUR1,2,3,4 turn
 };
 
 // Lie 趴地
 int Servo_Prg_8_Step = 2;
 int Servo_Prg_8 [][ALLMATRIX] PROGMEM = {
-  {     90,   90,    90,   90,  155,   15,   15,  155, 200  }, // servo center point
-  {     90,   90,    90,   90,  116,   63,   63,  116, 500  }, // leg1,4 up
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  {   90,  90,  90,  90,  80,  85,  85, 80, 200 }, // center
+  {   90,  90,  90,  90,  40, 125, 125, 40, 400 }, // lir
 };
 
 // Say Hi 打招呼
-int Servo_Prg_9_Step = 7;
+int Servo_Prg_9_Step = 5;
 int Servo_Prg_9 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {  120,  90,  90, 110,  60,  90,  90,  70,  200  }, // leg1, 3 down
-  {   70,  90,  90, 110, 110,  90,  90,  70,  200  }, // standby
-  {  120,  90,  90, 110,  60,  90,  90,  70,  200  }, // leg1, 3 down
-  {   70,  90,  90, 110, 110,  90,  90,  70,  200  }, // standby
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  {   90,  90,  90,  90,  80,  85,  85, 80, 200 }, // center
+  {   90,  90,  90,  90,  80, 120,  85, 50, 200 }, // CLAW2, 4 down
+  {   90,  90,  90,  90,  80,  85,  85, 80, 200 }, // standby
+  {   90,  90,  90,  90,  80, 120,  85, 50, 200 }, // CLAW2, 4 down
+  {   90,  90,  90,  90,  80,  85,  85, 80, 200 }, // center
 };
 
 // Fighting 戰鬥姿態
-int Servo_Prg_10_Step = 11;
+int Servo_Prg_10_Step = 12;
 int Servo_Prg_10 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {  120,  90,  90, 110,  60,  90,  90,  70,  200  }, // leg1, 2 down
-  {  120,  70,  70, 110,  60,  70,  70,  70,  200  }, // body turn left
-  {  120, 110, 110, 110,  60, 110, 110,  70,  200  }, // body turn right
-  {  120,  70,  70, 110,  60,  70,  70,  70,  200  }, // body turn left
-  {  120, 110, 110, 110,  60, 110, 110,  70,  200  }, // body turn right
-  {   70,  90,  90,  70, 110,  90,  90, 110,  200  }, // leg1, 2 up ; leg3, 4 down
-  {   70,  70,  70,  70, 110,  70,  70, 110,  200  }, // body turn left
-  {   70, 110, 110,  70, 110, 110, 110, 110,  200  }, // body turn right
-  {   70,  70,  70,  70, 110,  70,  70, 110,  200  }, // body turn left
-  {   70, 110, 110,  70, 110, 110, 110, 110,  200  }, // body turn right
-  {   70,  90,  90,  70, 110,  90,  90, 110,  200  }  // leg1, 2 up ; leg3, 4 down
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,ms
+  {   90,  90,  90,  90,  80,  85,  85,  80,200 }, // center
+  {   90,  90,  90,  90,  50, 85,  120,  80,200 }, // CLAW4, 2 up ; CLAW1, 3 down
+  {   70,  70,  70,  70,  50, 85,  120,  80,200 }, // body turn left
+  {  110, 110, 110, 110,  50, 85,  120,  80,200 }, // body turn right
+  {   70,  70,  70,  70,  50, 85,  120,  80,200 }, // body turn left
+  {  110, 110, 110, 110,  50, 85,  120,  80,200 }, // body turn right
+  {   90,  90,  90,  90,  80, 120,  85,  50,200 }, // CLAW4, 2 down
+  {   70,  70,  70,  70,  80, 120,  85,  50,200 }, // body turn left
+  {  110, 110, 110, 110,  80, 120,  85,  50,200 }, // body turn right
+  {   70,  70,  70,  70,  80, 120,  85,  50,200 }, // body turn left
+  {  110, 110, 110, 110,  80, 120,  85,  50,200 }, // body turn right
+  {   90,  90,  90,  90,  50, 85,  120,  80,200 }  // CLAW4, 2 up ; CLAW1, 3 down
 };
 
 // Push up 掌上壓
 int Servo_Prg_11_Step = 11;
 int Servo_Prg_11 [][ALLMATRIX] PROGMEM = {
-  //  ARM1, ARM2,  ARM3, ARM4, LEG1, LEG2, LEG3, LEG4,  ms
-  {     90,   90,    90,   90,  155,   15,   15,  155, 200  }, // start
-  {     90,   90,    90,   90,  116,   63,   63,  116, 300  }, // down
-  {     90,   90,    90,   90,  155,   15,   15,  155, 400  }, // up
-  {     90,   90,    90,   90,  116,   63,   63,  116, 500  }, // down
-  {     90,   90,    90,   90,  155,   15,   15,  155, 600  }, // up
-  {     90,   90,    90,   90,  116,   63,   63,  116, 700  }, // down
-  {     90,   90,    90,   90,  155,   15,   15,  155, 1300 }, // up
-  {     90,   90,    90,   90,  116,   63,   63,  116, 200  },  // down
-  {     90,   90,    90,   90,  155,   63,   63,  116, 300  }, // leg 1 up
-  {     90,   90,    90,   90,  155,   15,   63,  116, 300  }, // leg 2 up
-  {     90,   90,    90,   90,  155,   15,   15,  155, 200  }, // leg3, leg4 up
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4, ms
+  {   90,  90,  90,  90,  80,  85,  85,  80,200 }, // center
+  {   90,  90,  90,  90,  50, 120, 120,  50,400 }, // down
+  {   90,  90,  90,  90,  80,  85,  85,  80,500 }, // up
+  {   90,  90,  90,  90,  50, 120, 120,  50,600 }, // down
+  {   90,  90,  90,  90,  80,  85,  85,  80,700 }, // up
+  {   90,  90,  90,  90,  50, 120, 120,  50,1300 }, // down
+  {   90,  90,  90,  90,  80,  85,  85,  80,1800 }, // up
+  {   90,  90,  90,  90,  50, 120, 120,  50,200 }, // down
+  {   90,  90,  90,  90,  80, 120, 120,  50,500 }, // CLAW 1 up
+  {   90,  90,  90,  90,  80,  85, 120,  50,500 }, // CLAW 2 up
+  {   90,  90,  90,  90,  80,  85,  85,  80,500 }, // CLAW3, CLAW4 up
 };
 
 // Sleep 睡眠姿勢
 int Servo_Prg_12_Step = 2;
 int Servo_Prg_12 [][ALLMATRIX] PROGMEM = {
-  {     90,   90,    90,   90,  155,   15,   15,  155, 200  }, // servo center point
-  {     55,   115,  115,   55,  155,   15,   15,  155, 500  }, // leg1,4 up
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4, ms
+  {   90,  90,  90,  90,  70, 100, 100,  70, 200 }, // standby
+  {   65, 115, 115,  65,  90,  70,  70,  90, 500 }, // CLAW1,4 up
 };
 
 // 舞步 1
 int Servo_Prg_13_Step = 10;
 int Servo_Prg_13 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   90,  90,  90,  90,  90,  90,  90,  90,  300  }, // leg1,2,3,4 up
-  {   50,  90,  90,  90,  90,  90,  90,  90,  300  }, // leg1 dn
-  {   90,  90,  90, 130,  90,  90,  90,  90,  300  }, // leg1 up; leg2 dn
-  {   90,  90,  90,  90,  90,  90,  90,  50,  300  }, // leg2 up; leg4 dn
-  {   90,  90,  90,  90, 130,  90,  90,  90,  300  }, // leg4 up; leg3 dn
-  {   50,  90,  90,  90,  90,  90,  90,  90,  300  }, // leg3 up; leg1 dn
-  {   90,  90,  90, 130,  90,  90,  90,  90,  300  }, // leg1 up; leg2 dn
-  {   90,  90,  90,  90,  90,  90,  90,  50,  300  }, // leg2 up; leg4 dn
-  {   90,  90,  90,  90, 130,  90,  90,  90,  300  }, // leg4 up; leg3 dn
-  {   90,  90,  90,  90,  90,  90,  90,  90,  300  }, // leg3 up
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4, ms
+  {   90,  90,  90,  90,  80,  85,  85,  80, 200 }, // center
+  {   90,  90,  90,  90,  80,  85,  85,  50, 300 }, // CLAW4 dn
+  {   90,  90,  90,  90,  80,  85, 120,  80, 300 }, // CLAW4 up; CLAW3 dn
+  {   90,  90,  90,  90,  50,  85,  85,  80, 300 }, // CLAW3 up; CLAW1 dn
+  {   90,  90,  90,  90,  80, 120,  85,  80, 300 }, // CLAW1 up; CLAW2 dn
+  {   90,  90,  90,  90,  80,  85,  85,  50, 300 }, // CLAW2 up; CLAW4 dn
+  {   90,  90,  90,  90,  80,  85, 120,  80, 300 }, // CLAW4 up; CLAW3 dn
+  {   90,  90,  90,  90,  50,  85,  85,  80, 300 }, // CLAW3 up; CLAW1 dn
+  {   90,  90,  90,  90,  80, 120,  85,  80, 300 }, // CLAW1 up; CLAW2 dn
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300 }, // CLAW2 up
 };
 
 // 舞步 2
-int Servo_Prg_14_Step = 9;
+int Servo_Prg_14_Step = 10;
 int Servo_Prg_14 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   70,  45, 135, 110, 110, 135,  45,  70,  300  }, // leg1,2,3,4 two sides
-  {  115,  45, 135,  65, 110, 135,  45,  70,  300  }, // leg1,2 up
-  {   70,  45, 135, 110,  65, 135,  45, 115,  300  }, // leg1,2 dn; leg3,4 up
-  {  115,  45, 135,  65, 110, 135,  45,  70,  300  }, // leg3,4 dn; leg1,2 up
-  {   70,  45, 135, 110,  65, 135,  45, 115,  300  }, // leg1,2 dn; leg3,4 up
-  {  115,  45, 135,  65, 110, 135,  45,  70,  300  }, // leg3,4 dn; leg1,2 up
-  {   70,  45, 135, 110,  65, 135,  45, 115,  300  }, // leg1,2 dn; leg3,4 up
-  {  115,  45, 135,  65, 110, 135,  45,  70,  300  }, // leg3,4 dn; leg1,2 up
-  {   75,  45, 135, 105, 110, 135,  45,  70,  300  }, // leg1,2 dn
+  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  {   90,  90,  90,  90,  80,  85,  85,  80, 200 },  // standby
+  {  120,  60,  60, 120,  50, 120, 120,  50, 300  }, // CLAW1,2,3,4 two sides
+  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // CLAW1,2 up
+  {  120,  60,  60, 120,  50, 120,  85,  80, 300  }, // CLAW1,2 dn; CLAW3,4 up
+  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // CLAW3,4 dn; CLAW1,2 up
+  {  120,  60,  60, 120,  50, 120,  85,  80, 300  }, // CLAW1,2 dn; CLAW3,4 up
+  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // CLAW3,4 dn; CLAW1,2 up
+  {  120,  60,  60, 120,  50, 120,  85,  80, 300  }, // CLAW1,2 dn; CLAW3,4 up
+  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // CLAW3,4 dn; CLAW1,2 up
+  {  120,  60,  60, 120,  50, 120, 120,  50, 300  }, // CLAW1,2 dn
+  {   90,  90,  90,  90,  80,  85,  85,  80, 200 },  // standby
 };
 
+
 // 舞步 3
-int Servo_Prg_15_Step = 10;
+int Servo_Prg_15_Step = 9;
 int Servo_Prg_15 [][ALLMATRIX] PROGMEM = {
-  // P16, P05, P04, P00, P02, P14, P12, P13,  ms
-  {   70,  45,  45, 110, 110, 135, 135,  70,  300  }, // leg1,2,3,4 bk
-  {  110,  45,  45,  60,  70, 135, 135,  70,  300  }, // leg1,2,3 up
-  {   70,  45,  45, 110, 110, 135, 135,  70,  300  }, // leg1,2,3 dn
-  {  110,  45,  45, 110,  70, 135, 135, 120,  300  }, // leg1,3,4 up
-  {   70,  45,  45, 110, 110, 135, 135,  70,  300  }, // leg1,3,4 dn
-  {  110,  45,  45,  60,  70, 135, 135,  70,  300  }, // leg1,2,3 up
-  {   70,  45,  45, 110, 110, 135, 135,  70,  300  }, // leg1,2,3 dn
-  {  110,  45,  45, 110,  70, 135, 135, 120,  300  }, // leg1,3,4 up
-  {   70,  45,  45, 110, 110, 135, 135,  70,  300  }, // leg1,3,4 dn
-  {   70,  90,  90, 110, 110,  90,  90,  70,  300  }, // standby
+   //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // CLAW1,2,3,4 bk
+  {   140,  90,  40,  90, 80,   85,  85,  50,  300  }, // CLAW1,2,3 up
+  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // CLAW1,2,3 dn
+  {   140,  90,  40,  90, 80,  120,  85,  80,  300  }, // CLAW1,3,4 up
+  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // CLAW1,3,4 dn
+  {   140,  90,  40,  90, 80,   85,  85,  50,  300  }, // CLAW1,2,3 up
+  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // CLAW1,2,3 dn
+  {   140,  90,  40,  90, 80,  120,  85,  80,  300  }, // CLAW1,3,4 up
+  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // CLAW1,3,4 dn
 };
 
 /* MOTOR DECLARATION START */
@@ -286,31 +286,24 @@ int Servo_Prg_15 [][ALLMATRIX] PROGMEM = {
 void motorInit()
 {
   // Setup timer 
-  ledcSetup(ARM_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(ARM_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(ARM_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(ARM_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEG_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEG_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEG_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(LEG_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(FEMUR_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(FEMUR_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(FEMUR_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(FEMUR_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(CLAW_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(CLAW_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(CLAW_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(CLAW_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
  
   // Attach timer to a led pin
-  ledcAttachPin(13, ARM_1);  /* ARM 1 *//* CN1  *//* PIN 13*/
-  delay(50);
-  ledcAttachPin(33, ARM_2);  /* ARM 2 *//* CN7  *//* PIN 33*/
-  delay(50);
-  ledcAttachPin(15, ARM_3);  /* ARM 3 *//* CN9  *//* PIN 15*/
-  delay(50);
-  ledcAttachPin(19, ARM_4);  /* ARM 4 *//* CN15 *//* PIN 19*/
-  delay(50);
-  ledcAttachPin(12, LEG_1);  /* LEG 1 *//* CN2  *//* PIN 12*/
-  delay(50);
-  ledcAttachPin(32, LEG_2);  /* LEG 2 *//* CN8  *//* PIN 32*/
-  delay(50);
-  ledcAttachPin( 4, LEG_3);  /* LEG 3 *//* CN10 *//* PIN  4*/
-  delay(50);
-  ledcAttachPin(23, LEG_4);  /* LEG 4 *//* CN16 *//* PIN 23*/
+  ledcAttachPin(19, FEMUR_1);  /* FEMUR 1 *//* CN1 *//* PIN 19*/
+  ledcAttachPin(15, FEMUR_2);  /* FEMUR 2 *//* CN7  *//* PIN 15*/
+  ledcAttachPin(33, FEMUR_3);  /* FEMUR 3 *//* CN15  *//* PIN 33*/
+  ledcAttachPin(13, FEMUR_4);  /* FEMUR 4 *//* CN9  *//* PIN 13*/
+  ledcAttachPin(23, CLAW_1);  /* CLAW 1 *//* CN2 *//* PIN 23*/
+  ledcAttachPin( 4, CLAW_2);  /* CLAW 2 *//* CN8 *//* PIN  4*/
+  ledcAttachPin(32, CLAW_3);  /* CLAW 3 *//* CN16  *//* PIN 32*/
+  ledcAttachPin(12, CLAW_4);  /* CLAW 4 *//* CN10  *//* PIN 12*/
   delay(50);
 
 }
@@ -382,20 +375,20 @@ void handleSetting()
   content += "<br>";
   content += "<table width=100% height=90%>";
   content += "<tr>";
-  content += "<td width=50%>ARM1<br/><input type=text id=servo_0 value=\"" + servo0ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(0,'servo_0')>SET</button></td>";
-  content += "<td width=50%>LEG1<br/><input type=text id=servo_4 value=\"" + servo4ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(4,'servo_4')>SET</button></td>";
+  content += "<td width=50%>FEMUR1<br/><input type=text id=servo_0 value=\"" + servo0ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(0,'servo_0')>SET</button></td>";
+  content += "<td width=50%>CLAW1<br/><input type=text id=servo_4 value=\"" + servo4ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(4,'servo_4')>SET</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td>ARM2<br/><input type=text id=servo_1 value=\"" + servo1ValStr + "\"><button type=button onclick=saveServo(1,'servo_1')>SET</button></td>";
-  content += "<td>LEG2<br/><input type=text id=servo_5 value=\"" + servo5ValStr + "\"><button type=button onclick=saveServo(5,'servo_15')>SET</button></td>";
+  content += "<td>FEMUR2<br/><input type=text id=servo_1 value=\"" + servo1ValStr + "\"><button type=button onclick=saveServo(1,'servo_1')>SET</button></td>";
+  content += "<td>CLAW2<br/><input type=text id=servo_5 value=\"" + servo5ValStr + "\"><button type=button onclick=saveServo(5,'servo_15')>SET</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td>ARM3<br/><input type=text id=servo_2 value=\"" + servo2ValStr + "\"><button type=button onclick=saveServo(2,'servo_2')>SET</button></td>";
-  content += "<td>LEG3<br/><input type=text id=servo_6 value=\"" + servo6ValStr + "\"><button type=button onclick=saveServo(6,'servo_6')>SET</button></td>";
+  content += "<td>FEMUR3<br/><input type=text id=servo_2 value=\"" + servo2ValStr + "\"><button type=button onclick=saveServo(2,'servo_2')>SET</button></td>";
+  content += "<td>CLAW3<br/><input type=text id=servo_6 value=\"" + servo6ValStr + "\"><button type=button onclick=saveServo(6,'servo_6')>SET</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td>ARM4<br/><input type=text id=servo_3 value=\"" + servo3ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(3,'servo_3')>SET</button></td>";
-  content += "<td>LEG4<br/><input type=text id=servo_7 value=\"" + servo7ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(7,'servo_7')>SET</button></td>";
+  content += "<td>FEMUR4<br/><input type=text id=servo_3 value=\"" + servo3ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(3,'servo_3')>SET</button></td>";
+  content += "<td>CLAW4<br/><input type=text id=servo_7 value=\"" + servo7ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(7,'servo_7')>SET</button></td>";
   content += "</tr>";
   content += "<tr>";
   content += "<td colspan=2><button type=button style=background:#FFBFBF onclick=saveServo(100,0)>RESET ALL</button></td>";
@@ -450,29 +443,6 @@ void handleController()
   server.send(200, "text/html", "Input invalid");
 }
 
-void handleOnLed()
-{
-  String m0 = server.arg("m0");
-  String m1 = server.arg("m1");
-  String m2 = server.arg("m2");
-  String m3 = server.arg("m3");
-  String m4 = server.arg("m4");
-  String m5 = server.arg("m5");
-  String m6 = server.arg("m6");
-  String m7 = server.arg("m7");
-  String t1 = server.arg("t1");
-
-  Serial.println("Online");
-  // int Servo_Prg_tmp [][ALLMATRIX] = {
-  //   // GPIO14,     GPIO12,    GPIO13,     GPIO15,     GPIO16,     GPIO5,      GPIO4,      GPIO2,      Run Time
-  //   { m0.toInt(), m1.toInt(), m2.toInt(), m3.toInt(), m4.toInt(), m5.toInt(), m6.toInt(), m7.toInt(), t1.toInt() }
-  // };
-
-  // Servo_PROGRAM_Run(Servo_Prg_tmp, 1);
-
-  server.send(200, "text/html", "(m0, m1)=(" + m0 + "," + m1 + ")");
-}
-
 void handleZero()
 {
   String content = "";
@@ -513,20 +483,20 @@ void handleZero()
   content += "<br>";
   content += "<table width=100% height=90%>";
   content += "<tr>";
-  content += "<td width=50%><button type=button style=background:#FFE599 onclick=controlServo(4,45)>D16</button></td>";
-  content += "<td width=50%><button type=button style=background:#FFE599 onclick=controlServo(0,135)>D14</button></td>";
+  content += "<td width=50%><button type=button style=background:#FFE599 onclick=controlServo(5,155)>CLAW2</button></td>";
+  content += "<td width=50%><button type=button style=background:#FFE599 onclick=controlServo(7,15)>CLAW4</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td><button type=button onclick=controlServo(5,135)>D05</button></td>";
-  content += "<td><button type=button onclick=controlServo(1,45)>D12</button></td>";
+  content += "<td><button type=button onclick=controlServo(1,90)>FEMUR2</button></td>";
+  content += "<td><button type=button onclick=controlServo(3,90)>FEMUR4</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td><button type=button onclick=controlServo(6,45)>D04</button></td>";
-  content += "<td><button type=button onclick=controlServo(2,135)>D13</button></td>";
+  content += "<td><button type=button onclick=controlServo(0,90)>FEMUR1</button></td>";
+  content += "<td><button type=button onclick=controlServo(2,90)>FEMUR3</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td><button type=button style=background:#FFE599 onclick=controlServo(7,135)>D02</button></td>";
-  content += "<td><button type=button style=background:#FFE599 onclick=controlServo(3,45)>D15</button></td>";
+  content += "<td><button type=button style=background:#FFE599 onclick=controlServo(4,15)>CLAW1</button></td>";
+  content += "<td><button type=button style=background:#FFE599 onclick=controlServo(6,155)>CLAW3</button></td>";
   content += "</tr>";
   content += "<tr>";
   content += "<td colspan=2><button type=button style=background:#FFBFBF onclick=controlPm(100)>ZERO Postition</button></td>";
@@ -734,36 +704,36 @@ void handleEditor()
   content += "<table width=100% height=90%>";
 
   content += "<tr>";
-  content += "<td width=50%>ARM1 <span>Default 90<br>0 <input type=range id=range_0 min=0 max=180 value=90 onchange=controlServo(0,'range_0')> 180</span>";
+  content += "<td width=50%>FEMUR1 <span>Default 90<br>0 <input type=range id=range_0 min=0 max=180 value=90 onchange=controlServo(0,'range_0')> 180</span>";
   content += "<br><input type=text id=servo_0 value=90> <button type=button style=background:#FFE599 onclick=controlServo(0,'servo_0')>Send</button></td>";
-  content += "<td width=50%>LEG1 <span>Default 90<br>0 <input type=range id=range_4 min=0 max=180 value=90 onchange=controlServo(4,'range_4')> 180</span>";
+  content += "<td width=50%>CLAW1 <span>Default 90<br>0 <input type=range id=range_4 min=0 max=180 value=90 onchange=controlServo(4,'range_4')> 180</span>";
   content += "<br><input type=text id=servo_4 value=90> <button type=button style=background:#FFE599 onclick=controlServo(4,'servo_4')>Send</button></td>";
   content += "</tr>";
 
   content += "<tr><td colspan=4><span><br></span></td></tr>";
 
   content += "<tr>";
-  content += "<td>ARM2 <span>Default 90<br>0 <input type=range id=range_1 min=0 max=180 value=90 onchange=controlServo(1,'range_1')> 180</span>";
+  content += "<td>FEMUR2 <span>Default 90<br>0 <input type=range id=range_1 min=0 max=180 value=90 onchange=controlServo(1,'range_1')> 180</span>";
   content += "<br><input type=text id=servo_1 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(1,'servo_1')>Send</button></td>";
-  content += "<td>LEG2 <span>Default 90<br>0 <input type=range id=range_5 min=0 max=180 value=90 onchange=controlServo(5,'range_5')> 180</span>";
+  content += "<td>CLAW2 <span>Default 90<br>0 <input type=range id=range_5 min=0 max=180 value=90 onchange=controlServo(5,'range_5')> 180</span>";
   content += "<br><input type=text id=servo_5 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(5,'servo_5')>Send</button></td>";
   content += "</tr>";
 
   content += "<tr><td colspan=4><span><br></span></td></tr>";
 
   content += "<tr>";
-  content += "<td>ARM3 <span>Default 90<br>0 <input type=range id=range_2 min=0 max=180 value=90 onchange=controlServo(2,'range_2')> 180</span>";
+  content += "<td>FEMUR3 <span>Default 90<br>0 <input type=range id=range_2 min=0 max=180 value=90 onchange=controlServo(2,'range_2')> 180</span>";
   content += "<br><input type=text id=servo_2 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(2,'servo_2')>Send</button></td>";
-  content += "<td>LEG3 <span>Default 90<br>0 <input type=range id=range_6 min=0 max=180 value=90 onchange=controlServo(6,'range_6')> 180</span>";
+  content += "<td>CLAW3 <span>Default 90<br>0 <input type=range id=range_6 min=0 max=180 value=90 onchange=controlServo(6,'range_6')> 180</span>";
   content += "<br><input type=text id=servo_6 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(6,'servo_6')>Send</button></td>";
   content += "</tr>";
 
   content += "<tr><td colspan=4><span><br></span></td></tr>";
 
   content += "<tr>";
-  content += "<td>ARM4 <span>Default 90<br>0 <input type=range id=range_3 min=0 max=180 value=90 onchange=controlServo(3,'range_3')> 180</span>";
+  content += "<td>FEMUR4 <span>Default 90<br>0 <input type=range id=range_3 min=0 max=180 value=90 onchange=controlServo(3,'range_3')> 180</span>";
   content += "<br><input type=text id=servo_3 value=110> <button type=button style=background:#FFE599 onclick=controlServo(3,'servo_3')>Send</button></td>";
-  content += "<td>LEG4 <span>Default 90<br>0 <input type=range id=range_7 min=0 max=180 value=90 onchange=controlServo(7,'range_7')> 180</span>";
+  content += "<td>CLAW4 <span>Default 90<br>0 <input type=range id=range_7 min=0 max=180 value=90 onchange=controlServo(7,'range_7')> 180</span>";
   content += "<br><input type=text id=servo_7 value=70> <button type=button style=background:#FFE599 onclick=controlServo(7,'servo_7')>Send</button></td>";
   content += "</tr>";
 
@@ -821,17 +791,30 @@ void handleEditor()
 /* MOTOR CODE START */
 void Set_PWM_to_Servo(int iServo, int iValue)
 {
-  // 讀取 EEPROM 修正誤差
-  iValue = (iValue*MAX/180.0)+MIN;
-  double NewPWM = iValue + preferences.getDouble((String(iServo)).c_str(),0);
   Serial.print(F("iServo: "));
   Serial.print(iServo); 
   Serial.print(F(" iValue: "));
-  Serial.print(iValue);
-  Serial.print(F(" NewPWM: "));
-  Serial.println(NewPWM); 
+  Serial.println(iValue);
+  // 讀取 EEPROM 修正誤差
+  iValue = (iValue*MAX/180.0)+MIN;
+  double NewPWM = iValue + preferences.getDouble((String(iServo)).c_str(),0);
+
   /* 0 = zero degree 550 = 180 degree*/
   ledcWrite(iServo,NewPWM);
+}
+
+void Servo_PROGRAM_Standby()
+{
+  // 清除備份目前馬達數值
+  for (int Index = 0; Index < ALLMATRIX; Index++) {
+    Running_Servo_POS[Index] = Servo_Act_1[Index];
+  }
+
+  // 重新載入馬達預設數值
+  for (int iServo = 0; iServo < ALLSERVOS; iServo++) {
+    Set_PWM_to_Servo(iServo,Running_Servo_POS[iServo]);
+    delay(50);
+  }
 }
 
 void Servo_PROGRAM_Zero()
@@ -880,7 +863,6 @@ void Servo_PROGRAM_Run(int iMatrix[][ALLMATRIX], int iSteps)
         }
 
       }
-
       delay(BASEDELAYTIME);
     }
 
@@ -894,11 +876,13 @@ void Servo_PROGRAM_Run(int iMatrix[][ALLMATRIX], int iSteps)
 
 void setup()
 {
-  Serial.begin(115200);
-  WiFi.softAP(ssid);
-  WiFi.softAPConfig(local_ip, gateway, subnet);
-  delay(100);
-  if(!MDNS.begin("esp32")) {
+  Serial.begin(115200);/* start the serial monitor at 115200 baud rate */
+  WiFi.softAP(ssid);/* without password */
+  // WiFi.softAP(ssid, password);;/* with password */
+  WiFi.softAPConfig(local_ip, gateway, subnet); /* to add exception to server */
+
+  /* to access Index page through iSEBSpider.local */
+  if(!MDNS.begin("iSEBSpider")) { 
      Serial.println("Error starting mDNS");
      return;
   }
@@ -908,19 +892,20 @@ void setup()
   server.on("/zero", handleZero);
   server.on("/setting",handleSetting);
   server.on("/save", handleSave);
-  // server.on("/led", );
-
   server.begin();
   Serial.println("HTTP server started");
   MDNS.addService("http", "tcp", 80);
-
-  delay(50);
+  
+  if(false == WiFi.setTxPower(WIFI_POWER_2dBm))/* control the wifi tx power */
+  {
+    Serial.println("Update Tx Power fail");
+  } 
   motorInit();
   Servo_PROGRAM_Zero();
 
   ws2812fx.init();
   ws2812fx.setBrightness(1);
-  ws2812fx.setSegment(0, 0,LED_COUNT, FX_MODE_CUSTOM,  RED, 500, false);
+  ws2812fx.setSegment(0, 0,LED_COUNT, FX_MODE_CUSTOM,  RED, 200, false);
   ws2812fx.setCustomMode(myCustomEffect);
   ws2812fx.start();
 
@@ -935,11 +920,13 @@ void loop()
 {
   server.handleClient();
 
+
   if (Servo_PROGRAM >= 1 ) {
+    delay(500);
     switch (Servo_PROGRAM) {
       case 1: // Standby 待機
         Serial.println("Standby Button Pressed.");
-        Servo_PROGRAM_Run(Servo_Prg_1, Servo_Prg_1_Step);
+        Servo_PROGRAM_Standby();
         break;
       case 2: // Forward 前行
         Serial.println("Forward Button Pressed.");
@@ -972,7 +959,6 @@ void loop()
       case 9: // Say Hi 打招呼
         Serial.println("Say Hi Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_9, Servo_Prg_9_Step);
-        Servo_PROGRAM_Run(Servo_Prg_1, Servo_Prg_1_Step);
         break;
       case 10: // Fighting 戰鬥姿態
         Serial.println("Fighting Button Pressed.");
@@ -981,10 +967,10 @@ void loop()
       case 11: // Push up 掌上壓
         Serial.println("Push up Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_11, Servo_Prg_11_Step);
+        Servo_PROGRAM_Standby();
         break;
       case 12: // Sleep 睡眠姿勢
         Serial.println("Sleep Button Pressed.");
-        Servo_PROGRAM_Run(Servo_Prg_1, Servo_Prg_1_Step);
         Servo_PROGRAM_Run(Servo_Prg_12, Servo_Prg_12_Step);
         break;
       case 13: // 舞步 1
@@ -1002,7 +988,6 @@ void loop()
       case 100: // 歸零姿勢
         Serial.println("Zero");
         Servo_PROGRAM_Zero();
-        delay(300);
         break;
     }
     Servo_PROGRAM = 0;
