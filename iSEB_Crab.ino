@@ -22,12 +22,12 @@ unsigned long now = 0;
 // use 12 bit precission for LEDC timer
 #define LEDC_TIMER_12_BIT  12
 
-// use 5000 Hz as a LEDC base frequency
+// use 50 Hz as a LEDC base frequency
 #define LEDC_BASE_FREQ     50
 
 #define MIN 50
 #define MAX 550
-
+// why it is (_1 0) space?
 #define FEMUR_1 0
 #define FEMUR_2 1
 #define FEMUR_3 2
@@ -40,10 +40,11 @@ unsigned long now = 0;
 
 /* SERVER DECLARATION START */
 /* Put your SSID & Password */
-const char* ssid = "iSEB Spider";  // Enter SSID here
+const char* ssid = "iSEB Crab";  // Enter SSID here
 const char* password = "12345678";  //Enter Password here
 
 /* Put IP Address details */
+//From libray, variable decralation - IPAddress - data class. 
 IPAddress local_ip(192,168,1,1);
 IPAddress gateway(192,168,1,1);
 IPAddress subnet(255,255,255,0);
@@ -67,6 +68,7 @@ const int BASEDELAYTIME = 20; // 10 ms
 int Running_Servo_POS [ALLMATRIX] = {};
 
 // Servo zero position 歸零位置
+//Array 
 int Servo_Act_0 [ ] PROGMEM = {  90,  90, 90,  90,  15, 155, 155, 15,  500  };
 
 // Standby 待機
@@ -283,6 +285,9 @@ int Servo_Prg_15 [][ALLMATRIX] PROGMEM = {
 /* MOTOR DECLARATION START */
 
 /* PWM CODE START */
+// From ESP 32 library - sharing led and pwm function. 
+// input channel / frequency / resolution
+// base on servo spec: frequency - 50hz 
 void motorInit()
 {
   // Setup timer 
@@ -296,14 +301,14 @@ void motorInit()
   ledcSetup(CLAW_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
  
   // Attach timer to a led pin
-  ledcAttachPin(19, FEMUR_1);  /* FEMUR 1 *//* CN1 *//* PIN 19*/
-  ledcAttachPin(15, FEMUR_2);  /* FEMUR 2 *//* CN7  *//* PIN 15*/
-  ledcAttachPin(33, FEMUR_3);  /* FEMUR 3 *//* CN15  *//* PIN 33*/
-  ledcAttachPin(13, FEMUR_4);  /* FEMUR 4 *//* CN9  *//* PIN 13*/
-  ledcAttachPin(23, CLAW_1);  /* CLAW 1 *//* CN2 *//* PIN 23*/
-  ledcAttachPin( 4, CLAW_2);  /* CLAW 2 *//* CN8 *//* PIN  4*/
-  ledcAttachPin(32, CLAW_3);  /* CLAW 3 *//* CN16  *//* PIN 32*/
-  ledcAttachPin(12, CLAW_4);  /* CLAW 4 *//* CN10  *//* PIN 12*/
+  ledcAttachPin(19, FEMUR_1);  /* ARM 4 *//* CN15 *//* PIN 19*/
+	ledcAttachPin(15, FEMUR_2);  /* ARM 3 *//* CN9  *//* PIN 15*/
+	ledcAttachPin(33, FEMUR_3);  /* ARM 2 *//* CN7  *//* PIN 33*/
+	ledcAttachPin(13, FEMUR_4);  /* ARM 1 *//* CN1  *//* PIN 13*/
+	ledcAttachPin(23, CLAW_1);  /* LEG 4 *//* CN16 *//* PIN 23*/
+	ledcAttachPin( 4, CLAW_2);  /* LEG 3 *//* CN10 *//* PIN  4*/
+	ledcAttachPin(32, CLAW_3);  /* LEG 2 *//* CN8  *//* PIN 32*/
+	ledcAttachPin(12, CLAW_4);  /* LEG 1 *//* CN2  *//* PIN 12*/
   delay(50);
 
 }
@@ -919,8 +924,6 @@ void setup()
 void loop() 
 {
   server.handleClient();
-
-
   if (Servo_PROGRAM >= 1 ) {
     delay(500);
     switch (Servo_PROGRAM) {
@@ -992,7 +995,8 @@ void loop()
     }
     Servo_PROGRAM = 0;
   }
-
+// what is this for ?
+// to keep update RBG LED
   ws2812fx.service();
 }
 
