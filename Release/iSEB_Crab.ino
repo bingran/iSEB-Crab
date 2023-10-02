@@ -28,14 +28,14 @@ unsigned long now = 0;
 #define MIN 50
 #define MAX 550
 // why it is (_1 0) space?
-#define FEMUR_1 0
-#define FEMUR_2 1
-#define FEMUR_3 2
-#define FEMUR_4 3
-#define CLAW_1 4
-#define CLAW_2 5
-#define CLAW_3 6
-#define CLAW_4 7
+#define FEMUR_1 0 /* Chanel 0 */
+#define FEMUR_2 1 /* Chanel 1 */
+#define FEMUR_3 2 /* Chanel 2 */
+#define FEMUR_4 3 /* Chanel 3 */
+#define CLAW_1 4 /* Chanel 4 */
+#define CLAW_2 5 /* Chanel 5 */
+#define CLAW_3 6 /* Chanel 6 */
+#define CLAW_4 7 /* Chanel 7 */
 /* PWM DECLARATION END */
 
 /* SERVER DECLARATION START */
@@ -301,14 +301,14 @@ void motorInit()
   ledcSetup(CLAW_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
  
   // Attach timer to a led pin
-  ledcAttachPin(19, FEMUR_1);  /* ARM 4 *//* CN15 *//* PIN 19*/
-	ledcAttachPin(15, FEMUR_2);  /* ARM 3 *//* CN9  *//* PIN 15*/
-	ledcAttachPin(33, FEMUR_3);  /* ARM 2 *//* CN7  *//* PIN 33*/
-	ledcAttachPin(13, FEMUR_4);  /* ARM 1 *//* CN1  *//* PIN 13*/
-	ledcAttachPin(23, CLAW_1);  /* LEG 4 *//* CN16 *//* PIN 23*/
-	ledcAttachPin( 4, CLAW_2);  /* LEG 3 *//* CN10 *//* PIN  4*/
-	ledcAttachPin(32, CLAW_3);  /* LEG 2 *//* CN8  *//* PIN 32*/
-	ledcAttachPin(12, CLAW_4);  /* LEG 1 *//* CN2  *//* PIN 12*/
+  ledcAttachPin(19, FEMUR_1);  /* FEMUR_1 *//* CN15 *//* PIN 19*/
+	ledcAttachPin(15, FEMUR_2);  /* FEMUR_2 *//* CN9  *//* PIN 15*/
+	ledcAttachPin(33, FEMUR_3);  /* FEMUR_3 *//* CN7  *//* PIN 33*/
+	ledcAttachPin(13, FEMUR_4);  /* FEMUR_4*//* CN1  *//* PIN 13*/
+	ledcAttachPin(23, CLAW_1);  /* CLAW_1 *//* CN16 *//* PIN 23*/
+	ledcAttachPin( 4, CLAW_2);  /* CLAW_2 *//* CN10 *//* PIN  4*/
+	ledcAttachPin(32, CLAW_3);  /* CLAW_3 *//* CN8  *//* PIN 32*/
+	ledcAttachPin(12, CLAW_4);  /* CLAW_4 *//* CN2  *//* PIN 12*/
   delay(50);
 
 }
@@ -541,15 +541,15 @@ void handleIndex()
 
   content += "<html>";
   content += "<head>";
-  content += "<title>iSEB Spider</title>";
+  content += "<title>SMLab iCrab ™</title>";
   content += "<meta charset=UTF-8>";
   content += "<meta name=viewport content=width=device-width>";
   content += "<style type=text/css>";
   content += "body {";
-  content += "margin: 0px;";
-  content += "backgound-color: #FFFFFF;";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 100%;";
+  content += "margin:0px;";
+  content += "backgound-color:#FFFFFF;";
+  content += "font-family:helvetica,arial;";
+  content += "font-size:100%;";
   content += "color: #555555;";
   content += "text-align: center;";
   content += "}";
@@ -557,50 +557,57 @@ void handleIndex()
   content += "text-align: center;";
   content += "}";
   content += "span {";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 70%;";
-  content += "color: #777777;";
+  content += "font-family:helvetica,arial;";
+  content += "font-size:70%;";
+  content += "color:#777777;";
   content += "}";
-  content += "button {";
-  content += "width: 90%;";
-  content += "height: 90%;";
-  content += "font-family: helvetica, arial;";
-  content += "font-size: 100%;";
-  content += "color: #555555;";
-  content += "background: #BFDFFF;";
-  content += "border-radius: 4px;";
+  content += ".button{";
+  content += "width:90%;";
+  content += "height:90%;";
+  content += "font-family:helvetica,arial;";
+  content += "font-size:100%;";
+  content += "color:#555555;";
+  content += "background:#BFDFFF;";
+  content += "border-radius:4px;";
   content += "padding: 2px 2px 2px 2px;";
-  content += "border: none;";
-  content += "}";
+  content += "border:none;}";
+  content += ".button:active{";
+  content += "background-color:#999;";
+  content += "color:white;}";
+  content += ".button2{background-color:#BFFFCF;}";
+  content += ".button3{background-color:#FFBFBF;}"; 
+  content += ".button4{background-color:#FFCC99;}";
+  content += ".button5{background-color:#FFE599;}";
+  content += ".button6{background-color:#CFBFFF;}";
   content += "</style>";
   content += "</head>";
-  content += "<body><h1>iSEB Spider</h1>";
+  content += "<body><h1>SMLab iCrab ™</h1>";
   content += "<table width=100% height=90%>";
   content += "<tr height=19%>";
-  content += "<td width=33%><button type=button style=background:#BFFFCF onclick=controlPm(6)>Turn left</button></td>";
-  content += "<td width=33%><button type=button onclick=controlPm(2)>Forward</button></td>";
-  content += "<td width=33%><button type=button style=background:#BFFFCF onclick=controlPm(7)>Turn right</button></td>";
+  content += "<td width=33%><button class=\"button button2\" onclick=controlPm(6)>Turn left</button></td>";
+  content += "<td width=33%><button class=\"button\" onclick=controlPm(2)>Forward</button></td>";
+  content += "<td width=33%><button class=\"button button2\" onclick=controlPm(7)>Turn right</button></td>";
   content += "</tr>";
   content += "<tr height=19%>";
-  content += "<td><button type=button onclick=controlPm(4)>Left shift</button></td>";
-  content += "<td><button type=button onclick=controlPm(3)>Backward</button></td>";
-  content += "<td><button type=button onclick=controlPm(5)>Right shift</button></td>";
+  content += "<td><button class=\"button\" onclick=controlPm(4)>Left shift</button></td>";
+  content += "<td><button class=\"button\" onclick=controlPm(3)>Backward</button></td>";
+  content += "<td><button class=\"button\" onclick=controlPm(5)>Right shift</button></td>";
   content += "</tr>";
   content += "<tr height=5%><td colspan=3><span><br></span></td></tr>";
   content += "<tr height=20%>";
-  content += "<td><button type=button style=background:#FFCC99 onclick=controlPm(1)>Stand </button></td>";
-  content += "<td><button type=button style=background:#FFE599 onclick=controlPm(9)>Say Hi</button></td>";
-  content += "<td><button type=button style=background:#FFE599 onclick=controlPm(11)>Push up</button></td>";
+  content += "<td><button class=\"button button4\" onclick=controlPm(1)>Stand </button></td>";
+  content += "<td><button class=\"button button5\" onclick=controlPm(9)>Say Hi</button></td>";
+  content += "<td><button class=\"button button5\" onclick=controlPm(11)>Push up</button></td>";
   content += "</tr>";
   content += "<tr height=19%>";
-  content += "<td><button type=button style=background:#FFE599 onclick=controlPm(8)>Lie</button></td>";
-  content += "<td><button type=button style=background:#FFE599 onclick=controlPm(10)>Fighting</button></td>";
-  content += "<td><button type=button style=background:#FFBFBF onclick=controlPm(12)>Sleep</button></td>";
+  content += "<td><button class=\"button button5\" onclick=controlPm(8)>Lie</button></td>";
+  content += "<td><button class=\"button button5\" onclick=controlPm(10)>Fighting</button></td>";
+  content += "<td><button class=\"button button3\" onclick=controlPm(12)>Sleep</button></td>";
   content += "</tr>";
   content += "<tr height=19%>";
-  content += "<td><button type=button style=background:#CFBFFF onclick=controlPm(13)>Dance1</button></td>";
-  content += "<td><button type=button style=background:#CFBFFF onclick=controlPm(14)>Dance2</button></td>";
-  content += "<td><button type=button style=background:#CFBFFF onclick=controlPm(15)>Dance3</button></td>";
+  content += "<td><button class=\"button button6\" onclick=controlPm(13)>Dance1</button></td>";
+  content += "<td><button class=\"button button6\" onclick=controlPm(14)>Dance2</button></td>";
+  content += "<td><button class=\"button button6\" onclick=controlPm(15)>Dance3</button></td>";
   content += "</tr>";
   content += "</table>";
   content += "</body>";
@@ -801,7 +808,7 @@ void Set_PWM_to_Servo(int iServo, int iValue)
   Serial.print(F(" iValue: "));
   Serial.println(iValue);
   // 讀取 EEPROM 修正誤差
-  iValue = (iValue*MAX/180.0)+MIN;
+  iValue = (iValue*MAX/180.0)+MIN; /* convertion to pwm value */
   double NewPWM = iValue + preferences.getDouble((String(iServo)).c_str(),0);
 
   /* 0 = zero degree 550 = 180 degree*/
@@ -886,8 +893,8 @@ void setup()
   // WiFi.softAP(ssid, password);;/* with password */
   WiFi.softAPConfig(local_ip, gateway, subnet); /* to add exception to server */
 
-  /* to access Index page through iSEBSpider.local */
-  if(!MDNS.begin("iSEBSpider")) { 
+  /* to access Index page through iSEBCrab.local */
+  if(!MDNS.begin("iSEBCrab")) { 
      Serial.println("Error starting mDNS");
      return;
   }
@@ -918,7 +925,7 @@ void setup()
   // has to use a namespace name to prevent key name collisions. We will open storage in
   // RW-mode (second parameter has to be false).
   // Note: Namespace name is limited to 15 chars.
-  preferences.begin("iSEBSpider", false);
+  preferences.begin("iSEBCrab", false);
 }
 
 void loop() 
