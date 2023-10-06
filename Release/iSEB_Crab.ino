@@ -28,14 +28,14 @@ unsigned long now = 0;
 #define MIN 50
 #define MAX 550
 // why it is (_1 0) space?
-#define FEMUR_1 0 /* Chanel 0 */
-#define FEMUR_2 1 /* Chanel 1 */
-#define FEMUR_3 2 /* Chanel 2 */
-#define FEMUR_4 3 /* Chanel 3 */
-#define CLAW_1 4 /* Chanel 4 */
-#define CLAW_2 5 /* Chanel 5 */
-#define CLAW_3 6 /* Chanel 6 */
-#define CLAW_4 7 /* Chanel 7 */
+#define WALKING_1 0 /* Chanel 0 */
+#define WALKING_2 1 /* Chanel 1 */
+#define WALKING_3 2 /* Chanel 2 */
+#define WALKING_4 3 /* Chanel 3 */
+#define MERUS_1 4 /* Chanel 4 */
+#define MERUS_2 5 /* Chanel 5 */
+#define MERUS_3 6 /* Chanel 6 */
+#define MERUS_4 7 /* Chanel 7 */
 /* PWM DECLARATION END */
 
 /* SERVER DECLARATION START */
@@ -67,151 +67,151 @@ const int BASEDELAYTIME = 20; // 10 ms
 // Backup servo value
 int Running_Servo_POS [ALLMATRIX] = {};
 
-// Servo zero position 歸零位置
+// Servo zero position 
 //Array 
 int Servo_Act_0 [ ] PROGMEM = {  90,  90, 90,  90,  15, 155, 155, 15,  500  };
 
-// Standby 待機
+// Standby 
 int Servo_Act_1 [ ] PROGMEM = {  90,  90, 90,  90,  70, 100, 100, 70,  500  };
 
-// Forward 前行
+// Forward 
 int Servo_Prg_2_Step = 11;
 int Servo_Prg_2 [][ALLMATRIX] PROGMEM = {
- //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4, ms
+ //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4, ms
   {  90,  90,  90,  90,  80,  85,  85, 80, 200  }, // standby
-  {  90,  90,  90,  50,  55,  85,  85, 60, 200  }, // CLAW1,4 up; FEMUR4 fw
-  {  90,  90,  90,  50,  80,  85,  85, 80, 200  }, // CLAW1,4 dn
-  {  90,  90,  90,  50,  80, 115, 115, 80, 200  }, // CLAW2,3 up
-  {  50, 120,  90,  90,  80, 115, 115, 80, 200  }, // FEMUR1,4 bk; FEMUR2 fw
-  {  50, 120,  90,  90,  80,  85,  85, 80, 200  }, // CLAW2,3 dn
-  {  50, 120,  90,  90,  55,  85,  85, 55, 200  }, // CLAW1,4 up; FEMUR1 fw
-  {  90,  90, 120,  90,  55,  85,  85, 55, 200  }, // FEMUR2,3 bk
-  {  90,  90, 120,  90,  80,  85,  85, 80, 200  }, // CLAW1,4 dn
-  {  90,  90, 120,  90,  80,  85, 115, 80, 200  }, // CLAW3 up 
-  {  90,  90,  90,  90,  80,  85,  85, 80, 200  }, // CLAW3 dn FEMUR3 fw
+  {  90,  90,  90,  50,  55,  85,  85, 60, 200  }, // MERUS1,4 up; WALKING4 fw
+  {  90,  90,  90,  50,  80,  85,  85, 80, 200  }, // MERUS1,4 dn
+  {  90,  90,  90,  50,  80, 115, 115, 80, 200  }, // MERUS2,3 up
+  {  50, 120,  90,  90,  80, 115, 115, 80, 200  }, // WALKING1,4 bk; WALKING2 fw
+  {  50, 120,  90,  90,  80,  85,  85, 80, 200  }, // MERUS2,3 dn
+  {  50, 120,  90,  90,  55,  85,  85, 55, 200  }, // MERUS1,4 up; WALKING1 fw
+  {  90,  90, 120,  90,  55,  85,  85, 55, 200  }, // WALKING2,3 bk
+  {  90,  90, 120,  90,  80,  85,  85, 80, 200  }, // MERUS1,4 dn
+  {  90,  90, 120,  90,  80,  85, 115, 80, 200  }, // MERUS3 up 
+  {  90,  90,  90,  90,  80,  85,  85, 80, 200  }, // MERUS3 dn WALKING3 fw
 };
 
-	// Backward 退後
+	// Backward 
 int Servo_Prg_3_Step = 11;
 int Servo_Prg_3 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4, ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4, ms
   {   90,  90,  90,  90,  80,  85,  85, 80, 200  }, // standby
-  {   60,  90,  90,  90,  55,  85,  85, 50, 200  }, // CLAW4,1 up; FEMUR1 fw
-  {   60,  90,  90,  90,  80,  85,  85, 80, 200  }, // CLAW4,1 dn
-  {   60,  90,  90,  90,  80, 115, 115, 80, 200  }, // CLAW3,2 up
-  {   90,  90, 120,  60,  80, 115, 115, 80, 200  }, // FEMUR4,1 bk; FEMUR3 fw
-  {   90,  90, 120,  60,  80,  85,  85, 80, 200  }, // CLAW3,2 dn
-  {   90,  90, 120,  90,  55,  85,  85, 55, 200  }, // CLAW4,1 up; FEMUR4 fw
-  {   90, 120,  90,  90,  55,  85,  85, 55, 200  }, // FEMUR3,2 bk
-  {   90, 120,  90,  90,  80,  85,  85, 80, 200  }, // CLAW4,1 dn
-  {   90, 120,  90,  90,  80, 115,  85, 80, 200  }, // CLAW2 up FEMUR2 fw
-  {   90,  90,  90,  90,  80,  85,  85, 80, 200  }, // CLAW2 dn 
+  {   60,  90,  90,  90,  55,  85,  85, 50, 200  }, // MERUS4,1 up; WALKING1 fw
+  {   60,  90,  90,  90,  80,  85,  85, 80, 200  }, // MERUS4,1 dn
+  {   60,  90,  90,  90,  80, 115, 115, 80, 200  }, // MERUS3,2 up
+  {   90,  90, 120,  60,  80, 115, 115, 80, 200  }, // WALKING4,1 bk; WALKING3 fw
+  {   90,  90, 120,  60,  80,  85,  85, 80, 200  }, // MERUS3,2 dn
+  {   90,  90, 120,  90,  55,  85,  85, 55, 200  }, // MERUS4,1 up; WALKING4 fw
+  {   90, 120,  90,  90,  55,  85,  85, 55, 200  }, // WALKING3,2 bk
+  {   90, 120,  90,  90,  80,  85,  85, 80, 200  }, // MERUS4,1 dn
+  {   90, 120,  90,  90,  80, 115,  85, 80, 200  }, // MERUS2 up WALKING2 fw
+  {   90,  90,  90,  90,  80,  85,  85, 80, 200  }, // MERUS2 dn 
 };
 
-// Left shift 左移
+// Left shift 
 int Servo_Prg_4_Step = 11;
 int Servo_Prg_4 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4,  ms
   {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // standby
-  {   90,  90,  45,  90,  80, 120, 120,  80, 300  }, // CLAW2,3 up; FEMUR3 fw
-  {   90,  90,  45,  90,  80,  85,  85,  80, 300  }, // CLAW2,3 dn
-  {   90,  90,  45,  90,  50,  85,  85,  50, 300  }, // CLAW4,1 up
-  {   90,  45,  90, 120,  50,  85,  85,  50, 300  }, // FEMUR2,3 bk; FEMUR4 fw
-  {   90,  45,  90, 120,  80,  85,  85,  80, 300  }, // CLAW4,1 dn
-  {   90,  90,  90, 120,  80, 120, 120,  80, 300  }, // CLAW2,3 up; FEMUR2 fw
-  {  120,  90,  90,  90,  80, 120, 120,  80, 300  }, // FEMUR4,1 bk
-  {  120,  90,  90,  90,  80,  85,  85,  80, 300  }, // CLAW2,3 dn
-  {  120,  90,  90,  90,  50,  85,  85,  80, 300  }, // CLAW1 up
-  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // FEMUR1 fw CLAW1 dn
+  {   90,  90,  45,  90,  80, 120, 120,  80, 300  }, // MERUS2,3 up; WALKING3 fw
+  {   90,  90,  45,  90,  80,  85,  85,  80, 300  }, // MERUS2,3 dn
+  {   90,  90,  45,  90,  50,  85,  85,  50, 300  }, // MERUS4,1 up
+  {   90,  45,  90, 120,  50,  85,  85,  50, 300  }, // WALKING2,3 bk; WALKING4 fw
+  {   90,  45,  90, 120,  80,  85,  85,  80, 300  }, // MERUS4,1 dn
+  {   90,  90,  90, 120,  80, 120, 120,  80, 300  }, // MERUS2,3 up; WALKING2 fw
+  {  120,  90,  90,  90,  80, 120, 120,  80, 300  }, // WALKING4,1 bk
+  {  120,  90,  90,  90,  80,  85,  85,  80, 300  }, // MERUS2,3 dn
+  {  120,  90,  90,  90,  50,  85,  85,  80, 300  }, // MERUS1 up
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // WALKING1 fw MERUS1 dn
 };
 
-// Right shift 右移
+// Right shift 
 int Servo_Prg_5_Step = 11;
 int Servo_Prg_5 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4,  ms
   {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // standby
-  {   90,  45,  90,  90,  80, 120, 120,  80, 300  }, // CLAW3,2 up; FEMUR2 fw
-  {   90,  45,  90,  90,  80,  85,  85,  80, 300  }, // CLAW3,2 dn
-  {   90,  45,  90,  90,  50,  85,  85,  50, 300  }, // CLAW1,4 up
-  {  120,  90,  45,  90,  50,  85,  85,  50, 300  }, // FEMUR3,2 bk; FEMUR1 fw
-  {  120,  90,  45,  90,  80,  85,  85,  80, 300  }, // CLAW1,4 dn
-  {  120,  90,  90,  90,  80, 120, 120,  80, 300  }, // CLAW3,2 up; FEMUR3 fw
-  {   90,  90,  90, 120,  80, 120, 120,  80, 300  }, // FEMUR1,4 bk
-  {   90,  90,  90, 120,  80,  85,  85,  80, 300  }, // CLAW3,2 dn
-  {   90,  90,  90, 120,  80,  85,  85,  50, 300  }, // CLAW4 up
-  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // FEMUR4 fw CLAW4 dn
+  {   90,  45,  90,  90,  80, 120, 120,  80, 300  }, // MERUS3,2 up; WALKING2 fw
+  {   90,  45,  90,  90,  80,  85,  85,  80, 300  }, // MERUS3,2 dn
+  {   90,  45,  90,  90,  50,  85,  85,  50, 300  }, // MERUS1,4 up
+  {  120,  90,  45,  90,  50,  85,  85,  50, 300  }, // WALKING3,2 bk; WALKING1 fw
+  {  120,  90,  45,  90,  80,  85,  85,  80, 300  }, // MERUS1,4 dn
+  {  120,  90,  90,  90,  80, 120, 120,  80, 300  }, // MERUS3,2 up; WALKING3 fw
+  {   90,  90,  90, 120,  80, 120, 120,  80, 300  }, // WALKING1,4 bk
+  {   90,  90,  90, 120,  80,  85,  85,  80, 300  }, // MERUS3,2 dn
+  {   90,  90,  90, 120,  80,  85,  85,  50, 300  }, // MERUS4 up
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // WALKING4 fw MERUS4 dn
 
 };
 
-// Turn left 左轉
+// Turn left 
 int Servo_Prg_6_Step = 8;
 int Servo_Prg_6 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4,ms
   {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // standby
-  {   90,  90,  90,  90,  50,  85,  85,  50, 300  }, // CLAW4,1 up
-  {  135,  90,  90, 135,  50,  85,  85,  50, 300  }, // FEMUR4,1 turn
-  {  135,  90,  90, 135,  80,  85,  85,  80, 300  }, // CLAW4,1 dn
-  {  135,  90,  90, 135,  80, 120, 120,  80, 300  }, // CLAW3,2 up
-  {  135, 135, 135, 135,  80, 120, 120,  80, 300  }, // FEMUR3,2 turn
-  {  135, 135, 135, 135,  80,  85,  85,  80, 300  }, // CLAW3,2 dn
-  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // FEMUR1,2,3,4 turn
+  {   90,  90,  90,  90,  50,  85,  85,  50, 300  }, // MERUS4,1 up
+  {  135,  90,  90, 135,  50,  85,  85,  50, 300  }, // WALKING4,1 turn
+  {  135,  90,  90, 135,  80,  85,  85,  80, 300  }, // MERUS4,1 dn
+  {  135,  90,  90, 135,  80, 120, 120,  80, 300  }, // MERUS3,2 up
+  {  135, 135, 135, 135,  80, 120, 120,  80, 300  }, // WALKING3,2 turn
+  {  135, 135, 135, 135,  80,  85,  85,  80, 300  }, // MERUS3,2 dn
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // WALKING1,2,3,4 turn
 };
 
-// Turn right 右轉
+// Turn right 
 int Servo_Prg_7_Step = 8;
 int Servo_Prg_7 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4,  ms
   {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // standby
-  {   90,  90,  90,  90,  80, 120, 120,  80, 300  }, // CLAW3,2 up
-  {   90,  45,  45,  90,  80, 120, 120,  80, 300  }, // FEMUR3,2 turn
-  {   90,  45,  45,  90,  80,  85,  85,  80, 300  }, // CLAW3,2 dn
-  {   90,  45,  45,  90,  50,  85,  85,  50, 300  }, // CLAW4,1 up
-  {   45,  45,  45,  45,  50,  85,  85,  50, 300  }, // FEMUR4,1 turn
-  {   45,  45,  45,  45,  80,  85,  85,  80, 300  }, // CLAW4,1 dn
-  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // FEMUR1,2,3,4 turn
+  {   90,  90,  90,  90,  80, 120, 120,  80, 300  }, // MERUS3,2 up
+  {   90,  45,  45,  90,  80, 120, 120,  80, 300  }, // WALKING3,2 turn
+  {   90,  45,  45,  90,  80,  85,  85,  80, 300  }, // MERUS3,2 dn
+  {   90,  45,  45,  90,  50,  85,  85,  50, 300  }, // MERUS4,1 up
+  {   45,  45,  45,  45,  50,  85,  85,  50, 300  }, // WALKING4,1 turn
+  {   45,  45,  45,  45,  80,  85,  85,  80, 300  }, // MERUS4,1 dn
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300  }, // WALKING1,2,3,4 turn
 };
 
-// Lie 趴地
+// Lie 
 int Servo_Prg_8_Step = 2;
 int Servo_Prg_8 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4,  ms
   {   90,  90,  90,  90,  80,  85,  85, 80, 200 }, // center
   {   90,  90,  90,  90,  40, 125, 125, 40, 400 }, // lir
 };
 
-// Say Hi 打招呼
+// Say Hi 
 int Servo_Prg_9_Step = 5;
 int Servo_Prg_9 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4,  ms
   {   90,  90,  90,  90,  80,  85,  85, 80, 200 }, // center
-  {   90,  90,  90,  90,  80, 120,  85, 50, 200 }, // CLAW2, 4 down
+  {   90,  90,  90,  90,  80, 120,  85, 50, 200 }, // MERUS2, 4 down
   {   90,  90,  90,  90,  80,  85,  85, 80, 200 }, // standby
-  {   90,  90,  90,  90,  80, 120,  85, 50, 200 }, // CLAW2, 4 down
+  {   90,  90,  90,  90,  80, 120,  85, 50, 200 }, // MERUS2, 4 down
   {   90,  90,  90,  90,  80,  85,  85, 80, 200 }, // center
 };
 
-// Fighting 戰鬥姿態
+// Fighting 
 int Servo_Prg_10_Step = 12;
 int Servo_Prg_10 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4,ms
   {   90,  90,  90,  90,  80,  85,  85,  80,200 }, // center
-  {   90,  90,  90,  90,  50, 85,  120,  80,200 }, // CLAW4, 2 up ; CLAW1, 3 down
+  {   90,  90,  90,  90,  50, 85,  120,  80,200 }, // MERUS4, 2 up ; MERUS1, 3 down
   {   70,  70,  70,  70,  50, 85,  120,  80,200 }, // body turn left
   {  110, 110, 110, 110,  50, 85,  120,  80,200 }, // body turn right
   {   70,  70,  70,  70,  50, 85,  120,  80,200 }, // body turn left
   {  110, 110, 110, 110,  50, 85,  120,  80,200 }, // body turn right
-  {   90,  90,  90,  90,  80, 120,  85,  50,200 }, // CLAW4, 2 down
+  {   90,  90,  90,  90,  80, 120,  85,  50,200 }, // MERUS4, 2 down
   {   70,  70,  70,  70,  80, 120,  85,  50,200 }, // body turn left
   {  110, 110, 110, 110,  80, 120,  85,  50,200 }, // body turn right
   {   70,  70,  70,  70,  80, 120,  85,  50,200 }, // body turn left
   {  110, 110, 110, 110,  80, 120,  85,  50,200 }, // body turn right
-  {   90,  90,  90,  90,  50, 85,  120,  80,200 }  // CLAW4, 2 up ; CLAW1, 3 down
+  {   90,  90,  90,  90,  50, 85,  120,  80,200 }  // MERUS4, 2 up ; MERUS1, 3 down
 };
 
-// Push up 掌上壓
+// Push up 
 int Servo_Prg_11_Step = 11;
 int Servo_Prg_11 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4, ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4, ms
   {   90,  90,  90,  90,  80,  85,  85,  80,200 }, // center
   {   90,  90,  90,  90,  50, 120, 120,  50,400 }, // down
   {   90,  90,  90,  90,  80,  85,  85,  80,500 }, // up
@@ -220,66 +220,66 @@ int Servo_Prg_11 [][ALLMATRIX] PROGMEM = {
   {   90,  90,  90,  90,  50, 120, 120,  50,1300 }, // down
   {   90,  90,  90,  90,  80,  85,  85,  80,1800 }, // up
   {   90,  90,  90,  90,  50, 120, 120,  50,200 }, // down
-  {   90,  90,  90,  90,  80, 120, 120,  50,500 }, // CLAW 1 up
-  {   90,  90,  90,  90,  80,  85, 120,  50,500 }, // CLAW 2 up
-  {   90,  90,  90,  90,  80,  85,  85,  80,500 }, // CLAW3, CLAW4 up
+  {   90,  90,  90,  90,  80, 120, 120,  50,500 }, // MERUS 1 up
+  {   90,  90,  90,  90,  80,  85, 120,  50,500 }, // MERUS 2 up
+  {   90,  90,  90,  90,  80,  85,  85,  80,500 }, // MERUS3, MERUS4 up
 };
 
-// Sleep 睡眠姿勢
+// Sleep 
 int Servo_Prg_12_Step = 2;
 int Servo_Prg_12 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4, ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4, ms
   {   90,  90,  90,  90,  70, 100, 100,  70, 200 }, // standby
-  {   65, 115, 115,  65,  90,  70,  70,  90, 500 }, // CLAW1,4 up
+  {   65, 115, 115,  65,  90,  70,  70,  90, 500 }, // MERUS1,4 up
 };
 
-// 舞步 1
+// Dance 1
 int Servo_Prg_13_Step = 10;
 int Servo_Prg_13 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4, ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4, ms
   {   90,  90,  90,  90,  80,  85,  85,  80, 200 }, // center
-  {   90,  90,  90,  90,  80,  85,  85,  50, 300 }, // CLAW4 dn
-  {   90,  90,  90,  90,  80,  85, 120,  80, 300 }, // CLAW4 up; CLAW3 dn
-  {   90,  90,  90,  90,  50,  85,  85,  80, 300 }, // CLAW3 up; CLAW1 dn
-  {   90,  90,  90,  90,  80, 120,  85,  80, 300 }, // CLAW1 up; CLAW2 dn
-  {   90,  90,  90,  90,  80,  85,  85,  50, 300 }, // CLAW2 up; CLAW4 dn
-  {   90,  90,  90,  90,  80,  85, 120,  80, 300 }, // CLAW4 up; CLAW3 dn
-  {   90,  90,  90,  90,  50,  85,  85,  80, 300 }, // CLAW3 up; CLAW1 dn
-  {   90,  90,  90,  90,  80, 120,  85,  80, 300 }, // CLAW1 up; CLAW2 dn
-  {   90,  90,  90,  90,  80,  85,  85,  80, 300 }, // CLAW2 up
+  {   90,  90,  90,  90,  80,  85,  85,  50, 300 }, // MERUS4 dn
+  {   90,  90,  90,  90,  80,  85, 120,  80, 300 }, // MERUS4 up; MERUS3 dn
+  {   90,  90,  90,  90,  50,  85,  85,  80, 300 }, // MERUS3 up; MERUS1 dn
+  {   90,  90,  90,  90,  80, 120,  85,  80, 300 }, // MERUS1 up; MERUS2 dn
+  {   90,  90,  90,  90,  80,  85,  85,  50, 300 }, // MERUS2 up; MERUS4 dn
+  {   90,  90,  90,  90,  80,  85, 120,  80, 300 }, // MERUS4 up; MERUS3 dn
+  {   90,  90,  90,  90,  50,  85,  85,  80, 300 }, // MERUS3 up; MERUS1 dn
+  {   90,  90,  90,  90,  80, 120,  85,  80, 300 }, // MERUS1 up; MERUS2 dn
+  {   90,  90,  90,  90,  80,  85,  85,  80, 300 }, // MERUS2 up
 };
 
-// 舞步 2
+// Dance 2
 int Servo_Prg_14_Step = 10;
 int Servo_Prg_14 [][ALLMATRIX] PROGMEM = {
-  //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
+  //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4,  ms
   {   90,  90,  90,  90,  80,  85,  85,  80, 200 },  // standby
-  {  120,  60,  60, 120,  50, 120, 120,  50, 300  }, // CLAW1,2,3,4 two sides
-  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // CLAW1,2 up
-  {  120,  60,  60, 120,  50, 120,  85,  80, 300  }, // CLAW1,2 dn; CLAW3,4 up
-  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // CLAW3,4 dn; CLAW1,2 up
-  {  120,  60,  60, 120,  50, 120,  85,  80, 300  }, // CLAW1,2 dn; CLAW3,4 up
-  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // CLAW3,4 dn; CLAW1,2 up
-  {  120,  60,  60, 120,  50, 120,  85,  80, 300  }, // CLAW1,2 dn; CLAW3,4 up
-  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // CLAW3,4 dn; CLAW1,2 up
-  {  120,  60,  60, 120,  50, 120, 120,  50, 300  }, // CLAW1,2 dn
+  {  120,  60,  60, 120,  50, 120, 120,  50, 300  }, // MERUS1,2,3,4 two sides
+  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // MERUS1,2 up
+  {  120,  60,  60, 120,  50, 120,  85,  80, 300  }, // MERUS1,2 dn; MERUS3,4 up
+  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // MERUS3,4 dn; MERUS1,2 up
+  {  120,  60,  60, 120,  50, 120,  85,  80, 300  }, // MERUS1,2 dn; MERUS3,4 up
+  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // MERUS3,4 dn; MERUS1,2 up
+  {  120,  60,  60, 120,  50, 120,  85,  80, 300  }, // MERUS1,2 dn; MERUS3,4 up
+  {  120,  60,  60, 120,  80,  85, 120,  50, 300  }, // MERUS3,4 dn; MERUS1,2 up
+  {  120,  60,  60, 120,  50, 120, 120,  50, 300  }, // MERUS1,2 dn
   {   90,  90,  90,  90,  80,  85,  85,  80, 200 },  // standby
 };
 
 
-// 舞步 3
+// Dance 3
 int Servo_Prg_15_Step = 9;
 int Servo_Prg_15 [][ALLMATRIX] PROGMEM = {
-   //FEMUR1,FEMUR2,FEMUR3,FEMUR4,CLAW1,CLAW2,CLAW3,CLAW4,  ms
-  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // CLAW1,2,3,4 bk
-  {   140,  90,  40,  90, 80,   85,  85,  50,  300  }, // CLAW1,2,3 up
-  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // CLAW1,2,3 dn
-  {   140,  90,  40,  90, 80,  120,  85,  80,  300  }, // CLAW1,3,4 up
-  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // CLAW1,3,4 dn
-  {   140,  90,  40,  90, 80,   85,  85,  50,  300  }, // CLAW1,2,3 up
-  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // CLAW1,2,3 dn
-  {   140,  90,  40,  90, 80,  120,  85,  80,  300  }, // CLAW1,3,4 up
-  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // CLAW1,3,4 dn
+   //WALKING1,WALKING2,WALKING3,WALKING4,MERUS1,MERUS2,MERUS3,MERUS4,  ms
+  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // MERUS1,2,3,4 bk
+  {   140,  90,  40,  90, 80,   85,  85,  50,  300  }, // MERUS1,2,3 up
+  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // MERUS1,2,3 dn
+  {   140,  90,  40,  90, 80,  120,  85,  80,  300  }, // MERUS1,3,4 up
+  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // MERUS1,3,4 dn
+  {   140,  90,  40,  90, 80,   85,  85,  50,  300  }, // MERUS1,2,3 up
+  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // MERUS1,2,3 dn
+  {   140,  90,  40,  90, 80,  120,  85,  80,  300  }, // MERUS1,3,4 up
+  {   140,  90,  40,  90, 50,  120, 120,  50,  300  }, // MERUS1,3,4 dn
 };
 
 /* MOTOR DECLARATION START */
@@ -291,24 +291,24 @@ int Servo_Prg_15 [][ALLMATRIX] PROGMEM = {
 void motorInit()
 {
   // Setup timer 
-  ledcSetup(FEMUR_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(FEMUR_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(FEMUR_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(FEMUR_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(CLAW_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(CLAW_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(CLAW_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(CLAW_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
- 
+  ledcSetup(WALKING_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(WALKING_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(WALKING_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(WALKING_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(MERUS_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(MERUS_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(MERUS_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(MERUS_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+
   // Attach timer to a led pin
-  ledcAttachPin(19, FEMUR_1);  /* FEMUR_1 *//* CN15 *//* PIN 19*/
-	ledcAttachPin(15, FEMUR_2);  /* FEMUR_2 *//* CN9  *//* PIN 15*/
-	ledcAttachPin(33, FEMUR_3);  /* FEMUR_3 *//* CN7  *//* PIN 33*/
-	ledcAttachPin(13, FEMUR_4);  /* FEMUR_4*//* CN1  *//* PIN 13*/
-	ledcAttachPin(23, CLAW_1);  /* CLAW_1 *//* CN16 *//* PIN 23*/
-	ledcAttachPin( 4, CLAW_2);  /* CLAW_2 *//* CN10 *//* PIN  4*/
-	ledcAttachPin(32, CLAW_3);  /* CLAW_3 *//* CN8  *//* PIN 32*/
-	ledcAttachPin(12, CLAW_4);  /* CLAW_4 *//* CN2  *//* PIN 12*/
+  ledcAttachPin(19, WALKING_1);  /* WALKING_1 *//* CN15 *//* PIN 19*/
+  ledcAttachPin(15, WALKING_2);  /* WALKING_2 *//* CN9  *//* PIN 15*/
+  ledcAttachPin(33, WALKING_3);  /* WALKING_3 *//* CN7  *//* PIN 33*/
+  ledcAttachPin(13, WALKING_4);  /* WALKING_4*//* CN1  *//* PIN 13*/
+  ledcAttachPin(23, MERUS_1);  /* MERUS_1 *//* CN16 *//* PIN 23*/
+  ledcAttachPin( 4, MERUS_2);  /* MERUS_2 *//* CN10 *//* PIN  4*/
+  ledcAttachPin(32, MERUS_3);  /* MERUS_3 *//* CN8  *//* PIN 32*/
+  ledcAttachPin(12, MERUS_4);  /* MERUS_4 *//* CN2  *//* PIN 12*/
   delay(50);
 
 }
@@ -380,20 +380,20 @@ void handleSetting()
   content += "<br>";
   content += "<table width=100% height=90%>";
   content += "<tr>";
-  content += "<td width=50%>FEMUR1<br/><input type=text id=servo_0 value=\"" + servo0ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(0,'servo_0')>SET</button></td>";
-  content += "<td width=50%>CLAW1<br/><input type=text id=servo_4 value=\"" + servo4ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(4,'servo_4')>SET</button></td>";
+  content += "<td width=50%>WALKING1<br/><input type=text id=servo_0 value=\"" + servo0ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(0,'servo_0')>SET</button></td>";
+  content += "<td width=50%>MERUS1<br/><input type=text id=servo_4 value=\"" + servo4ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(4,'servo_4')>SET</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td>FEMUR2<br/><input type=text id=servo_1 value=\"" + servo1ValStr + "\"><button type=button onclick=saveServo(1,'servo_1')>SET</button></td>";
-  content += "<td>CLAW2<br/><input type=text id=servo_5 value=\"" + servo5ValStr + "\"><button type=button onclick=saveServo(5,'servo_15')>SET</button></td>";
+  content += "<td>WALKING2<br/><input type=text id=servo_1 value=\"" + servo1ValStr + "\"><button type=button onclick=saveServo(1,'servo_1')>SET</button></td>";
+  content += "<td>MERUS2<br/><input type=text id=servo_5 value=\"" + servo5ValStr + "\"><button type=button onclick=saveServo(5,'servo_15')>SET</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td>FEMUR3<br/><input type=text id=servo_2 value=\"" + servo2ValStr + "\"><button type=button onclick=saveServo(2,'servo_2')>SET</button></td>";
-  content += "<td>CLAW3<br/><input type=text id=servo_6 value=\"" + servo6ValStr + "\"><button type=button onclick=saveServo(6,'servo_6')>SET</button></td>";
+  content += "<td>WALKING3<br/><input type=text id=servo_2 value=\"" + servo2ValStr + "\"><button type=button onclick=saveServo(2,'servo_2')>SET</button></td>";
+  content += "<td>MERUS3<br/><input type=text id=servo_6 value=\"" + servo6ValStr + "\"><button type=button onclick=saveServo(6,'servo_6')>SET</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td>FEMUR4<br/><input type=text id=servo_3 value=\"" + servo3ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(3,'servo_3')>SET</button></td>";
-  content += "<td>CLAW4<br/><input type=text id=servo_7 value=\"" + servo7ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(7,'servo_7')>SET</button></td>";
+  content += "<td>WALKING4<br/><input type=text id=servo_3 value=\"" + servo3ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(3,'servo_3')>SET</button></td>";
+  content += "<td>MERUS4<br/><input type=text id=servo_7 value=\"" + servo7ValStr + "\"><button type=button style=background:#FFE599 onclick=saveServo(7,'servo_7')>SET</button></td>";
   content += "</tr>";
   content += "<tr>";
   content += "<td colspan=2><button type=button style=background:#FFBFBF onclick=saveServo(100,0)>RESET ALL</button></td>";
@@ -474,7 +474,7 @@ void handleZero()
   content += "color: #777777;";
   content += "}";
   content += "button {";
-  content += "width: 40%;";
+  content += "width: 60%;";
   content += "font-family: helvetica, arial;";
   content += "font-size: 90%;";
   content += "color: #555555;";
@@ -488,20 +488,20 @@ void handleZero()
   content += "<br>";
   content += "<table width=100% height=90%>";
   content += "<tr>";
-  content += "<td width=50%><button type=button style=background:#FFE599 onclick=controlServo(5,155)>CLAW2</button></td>";
-  content += "<td width=50%><button type=button style=background:#FFE599 onclick=controlServo(7,15)>CLAW4</button></td>";
+  content += "<td width=50%><button type=button style=background:#FFE599 onclick=controlServo(5,155)>MERUS_2</button></td>";
+  content += "<td width=50%><button type=button style=background:#FFE599 onclick=controlServo(7,15)>MERUS_4</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td><button type=button onclick=controlServo(1,90)>FEMUR2</button></td>";
-  content += "<td><button type=button onclick=controlServo(3,90)>FEMUR4</button></td>";
+  content += "<td><button type=button onclick=controlServo(1,90)>WALKING_2</button></td>";
+  content += "<td><button type=button onclick=controlServo(3,90)>WALKING_4</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td><button type=button onclick=controlServo(0,90)>FEMUR1</button></td>";
-  content += "<td><button type=button onclick=controlServo(2,90)>FEMUR3</button></td>";
+  content += "<td><button type=button onclick=controlServo(0,90)>WALKING_1</button></td>";
+  content += "<td><button type=button onclick=controlServo(2,90)>WALKING_3</button></td>";
   content += "</tr>";
   content += "<tr>";
-  content += "<td><button type=button style=background:#FFE599 onclick=controlServo(4,15)>CLAW1</button></td>";
-  content += "<td><button type=button style=background:#FFE599 onclick=controlServo(6,155)>CLAW3</button></td>";
+  content += "<td><button type=button style=background:#FFE599 onclick=controlServo(4,15)>MERUS_1</button></td>";
+  content += "<td><button type=button style=background:#FFE599 onclick=controlServo(6,155)>MERUS_3</button></td>";
   content += "</tr>";
   content += "<tr>";
   content += "<td colspan=2><button type=button style=background:#FFBFBF onclick=controlPm(100)>ZERO Postition</button></td>";
@@ -716,36 +716,36 @@ void handleEditor()
   content += "<table width=100% height=90%>";
 
   content += "<tr>";
-  content += "<td width=50%>FEMUR1 <span>Default 90<br>0 <input type=range id=range_0 min=0 max=180 value=90 onchange=controlServo(0,'range_0')> 180</span>";
+  content += "<td width=50%>WALKING1 <span>Default 90<br>0 <input type=range id=range_0 min=0 max=180 value=90 onchange=controlServo(0,'range_0')> 180</span>";
   content += "<br><input type=text id=servo_0 value=90> <button type=button style=background:#FFE599 onclick=controlServo(0,'servo_0')>Send</button></td>";
-  content += "<td width=50%>CLAW1 <span>Default 90<br>0 <input type=range id=range_4 min=0 max=180 value=90 onchange=controlServo(4,'range_4')> 180</span>";
+  content += "<td width=50%>MERUS1 <span>Default 90<br>0 <input type=range id=range_4 min=0 max=180 value=90 onchange=controlServo(4,'range_4')> 180</span>";
   content += "<br><input type=text id=servo_4 value=90> <button type=button style=background:#FFE599 onclick=controlServo(4,'servo_4')>Send</button></td>";
   content += "</tr>";
 
   content += "<tr><td colspan=4><span><br></span></td></tr>";
 
   content += "<tr>";
-  content += "<td>FEMUR2 <span>Default 90<br>0 <input type=range id=range_1 min=0 max=180 value=90 onchange=controlServo(1,'range_1')> 180</span>";
+  content += "<td>WALKING2 <span>Default 90<br>0 <input type=range id=range_1 min=0 max=180 value=90 onchange=controlServo(1,'range_1')> 180</span>";
   content += "<br><input type=text id=servo_1 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(1,'servo_1')>Send</button></td>";
-  content += "<td>CLAW2 <span>Default 90<br>0 <input type=range id=range_5 min=0 max=180 value=90 onchange=controlServo(5,'range_5')> 180</span>";
+  content += "<td>MERUS2 <span>Default 90<br>0 <input type=range id=range_5 min=0 max=180 value=90 onchange=controlServo(5,'range_5')> 180</span>";
   content += "<br><input type=text id=servo_5 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(5,'servo_5')>Send</button></td>";
   content += "</tr>";
 
   content += "<tr><td colspan=4><span><br></span></td></tr>";
 
   content += "<tr>";
-  content += "<td>FEMUR3 <span>Default 90<br>0 <input type=range id=range_2 min=0 max=180 value=90 onchange=controlServo(2,'range_2')> 180</span>";
+  content += "<td>WALKING3 <span>Default 90<br>0 <input type=range id=range_2 min=0 max=180 value=90 onchange=controlServo(2,'range_2')> 180</span>";
   content += "<br><input type=text id=servo_2 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(2,'servo_2')>Send</button></td>";
-  content += "<td>CLAW3 <span>Default 90<br>0 <input type=range id=range_6 min=0 max=180 value=90 onchange=controlServo(6,'range_6')> 180</span>";
+  content += "<td>MERUS3 <span>Default 90<br>0 <input type=range id=range_6 min=0 max=180 value=90 onchange=controlServo(6,'range_6')> 180</span>";
   content += "<br><input type=text id=servo_6 value=90> <button type=button style=background:#BFDFFF onclick=controlServo(6,'servo_6')>Send</button></td>";
   content += "</tr>";
 
   content += "<tr><td colspan=4><span><br></span></td></tr>";
 
   content += "<tr>";
-  content += "<td>FEMUR4 <span>Default 90<br>0 <input type=range id=range_3 min=0 max=180 value=90 onchange=controlServo(3,'range_3')> 180</span>";
+  content += "<td>WALKING4 <span>Default 90<br>0 <input type=range id=range_3 min=0 max=180 value=90 onchange=controlServo(3,'range_3')> 180</span>";
   content += "<br><input type=text id=servo_3 value=110> <button type=button style=background:#FFE599 onclick=controlServo(3,'servo_3')>Send</button></td>";
-  content += "<td>CLAW4 <span>Default 90<br>0 <input type=range id=range_7 min=0 max=180 value=90 onchange=controlServo(7,'range_7')> 180</span>";
+  content += "<td>MERUS4 <span>Default 90<br>0 <input type=range id=range_7 min=0 max=180 value=90 onchange=controlServo(7,'range_7')> 180</span>";
   content += "<br><input type=text id=servo_7 value=70> <button type=button style=background:#FFE599 onclick=controlServo(7,'servo_7')>Send</button></td>";
   content += "</tr>";
 
@@ -807,7 +807,7 @@ void Set_PWM_to_Servo(int iServo, int iValue)
   Serial.print(iServo); 
   Serial.print(F(" iValue: "));
   Serial.println(iValue);
-  // 讀取 EEPROM 修正誤差
+  // Read from EEPROM to fix zero error reading
   iValue = (iValue*MAX/180.0)+MIN; /* convertion to pwm value */
   double NewPWM = iValue + preferences.getDouble((String(iServo)).c_str(),0);
 
@@ -817,12 +817,12 @@ void Set_PWM_to_Servo(int iServo, int iValue)
 
 void Servo_PROGRAM_Standby()
 {
-  // 清除備份目前馬達數值
+  /* Update standby value to servo motor variable */
   for (int Index = 0; Index < ALLMATRIX; Index++) {
     Running_Servo_POS[Index] = Servo_Act_1[Index];
   }
 
-  // 重新載入馬達預設數值
+  /* Update the servo motor to standby position */
   for (int iServo = 0; iServo < ALLSERVOS; iServo++) {
     Set_PWM_to_Servo(iServo,Running_Servo_POS[iServo]);
     delay(50);
@@ -831,12 +831,12 @@ void Servo_PROGRAM_Standby()
 
 void Servo_PROGRAM_Zero()
 {
-  // 清除備份目前馬達數值
+  /* Update zero value to servo motor variable */
   for (int Index = 0; Index < ALLMATRIX; Index++) {
     Running_Servo_POS[Index] = Servo_Act_0[Index];
   }
 
-  // 重新載入馬達預設數值
+    /* Update the servo motor to zero position */
   for (int iServo = 0; iServo < ALLSERVOS; iServo++) {
     Set_PWM_to_Servo(iServo,Running_Servo_POS[iServo]);
     delay(50);
@@ -847,28 +847,28 @@ void Servo_PROGRAM_Run(int iMatrix[][ALLMATRIX], int iSteps)
 {
   int INT_TEMP_A, INT_TEMP_B, INT_TEMP_C;
 
-  for (int MainLoopIndex = 0; MainLoopIndex < iSteps; MainLoopIndex++) { // iSteps 步驟主迴圈
+  for (int MainLoopIndex = 0; MainLoopIndex < iSteps; MainLoopIndex++) { // iSteps number of step
 
-    int InterTotalTime = iMatrix[MainLoopIndex][ALLMATRIX - 1]; // InterTotalTime 此步驟總時間
+    int InterTotalTime = iMatrix[MainLoopIndex][ALLMATRIX - 1]; // InterTotalTime - total time needed
 
-    int InterDelayCounter = InterTotalTime / BASEDELAYTIME; // InterDelayCounter 此步驟基本延遲次數
+    int InterDelayCounter = InterTotalTime / BASEDELAYTIME; // InterDelayCounter time / step 
 
-    for (int InterStepLoop = 0; InterStepLoop < InterDelayCounter; InterStepLoop++) { // 內差次數迴圈
+    for (int InterStepLoop = 0; InterStepLoop < InterDelayCounter; InterStepLoop++) { 
 
-      for (int ServoIndex = 0; ServoIndex < ALLSERVOS; ServoIndex++) { // 馬達主迴圈
+      for (int ServoIndex = 0; ServoIndex < ALLSERVOS; ServoIndex++) { 
 
-        INT_TEMP_A = Running_Servo_POS[ServoIndex]; // 馬達現在位置
-        INT_TEMP_B = iMatrix[MainLoopIndex][ServoIndex]; // 馬達目標位置
+        INT_TEMP_A = Running_Servo_POS[ServoIndex]; // servo motor current position
+        INT_TEMP_B = iMatrix[MainLoopIndex][ServoIndex]; // servo motor next position
 
-        if (INT_TEMP_A == INT_TEMP_B) { // 馬達數值不變
+        if (INT_TEMP_A == INT_TEMP_B) { // no update in servo motor position
           INT_TEMP_C = INT_TEMP_B;
-        } else if (INT_TEMP_A > INT_TEMP_B) { // 馬達數值減少
-          INT_TEMP_C =  map(BASEDELAYTIME * InterStepLoop, 0, InterTotalTime, 0, INT_TEMP_A - INT_TEMP_B); // PWM內差值 = map(執行次數時間累加, 開始時間, 結束時間, 內差起始值, 內差最大值)
+        } else if (INT_TEMP_A > INT_TEMP_B) { // servo motor position position reduce
+          INT_TEMP_C =  map(BASEDELAYTIME * InterStepLoop, 0, InterTotalTime, 0, INT_TEMP_A - INT_TEMP_B); 
           if (INT_TEMP_A - INT_TEMP_C >= INT_TEMP_B) {
             Set_PWM_to_Servo(ServoIndex, INT_TEMP_A - INT_TEMP_C);
           }
-        } else if (INT_TEMP_A < INT_TEMP_B) { // 馬達數值增加
-          INT_TEMP_C =  map(BASEDELAYTIME * InterStepLoop, 0, InterTotalTime, 0, INT_TEMP_B - INT_TEMP_A); // PWM內差值 = map(執行次數時間累加, 開始時間, 結束時間, 內差起始值, 內差最大值)
+        } else if (INT_TEMP_A < INT_TEMP_B) { /// servo motor position position increase
+          INT_TEMP_C =  map(BASEDELAYTIME * InterStepLoop, 0, InterTotalTime, 0, INT_TEMP_B - INT_TEMP_A); 
           if (INT_TEMP_A + INT_TEMP_C <= INT_TEMP_B) {
             Set_PWM_to_Servo(ServoIndex, INT_TEMP_A + INT_TEMP_C);
           }
@@ -878,7 +878,7 @@ void Servo_PROGRAM_Run(int iMatrix[][ALLMATRIX], int iSteps)
       delay(BASEDELAYTIME);
     }
 
-    // 備份目前馬達數值
+    // back of current servo motor position
     for (int Index = 0; Index < ALLMATRIX; Index++) {
       Running_Servo_POS[Index] = iMatrix[MainLoopIndex][Index];
     }
@@ -934,76 +934,76 @@ void loop()
   if (Servo_PROGRAM >= 1 ) {
     delay(500);
     switch (Servo_PROGRAM) {
-      case 1: // Standby 待機
+      case 1: // Standby 
         Serial.println("Standby Button Pressed.");
         Servo_PROGRAM_Standby();
         break;
-      case 2: // Forward 前行
+      case 2: // Forward 
         Serial.println("Forward Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_2, Servo_Prg_2_Step);
         break;
-      case 3: // Backward 退後
+      case 3: // Backward 
         Serial.println("Backward Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_3, Servo_Prg_3_Step);
         break;
-      case 4: // Left shift 左移
+      case 4: // Left shift 
         Serial.println("Left shift Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_4, Servo_Prg_4_Step);
         break;
-      case 5: // Right shift 右移
+      case 5: // Right shift 
         Serial.println("Right shift Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_5, Servo_Prg_5_Step);
         break;
-      case 6: // Turn left 左轉
+      case 6: // Turn left 
         Serial.println("Turn left Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_6, Servo_Prg_6_Step);
         break;
-      case 7: // Turn right 右轉
+      case 7: // Turn right 
         Serial.println("Turn right Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_7, Servo_Prg_7_Step);
         break;
-      case 8: // Lie 趴地
+      case 8: // Lie 
         Serial.println("Lie Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_8, Servo_Prg_8_Step);
         break;
-      case 9: // Say Hi 打招呼
+      case 9: // Say Hi 
         Serial.println("Say Hi Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_9, Servo_Prg_9_Step);
         break;
-      case 10: // Fighting 戰鬥姿態
+      case 10: // Fighting 
         Serial.println("Fighting Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_10, Servo_Prg_10_Step);
         break;
-      case 11: // Push up 掌上壓
+      case 11: // Push up 
         Serial.println("Push up Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_11, Servo_Prg_11_Step);
         Servo_PROGRAM_Standby();
         break;
-      case 12: // Sleep 睡眠姿勢
+      case 12: // Sleep 
         Serial.println("Sleep Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_12, Servo_Prg_12_Step);
         break;
-      case 13: // 舞步 1
+      case 13: // Dance 1
         Serial.println("Dance 1 Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_13, Servo_Prg_13_Step);
         break;
-      case 14: // 舞步 2
+      case 14: // Dance 2
         Serial.println("Dance 2 Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_14, Servo_Prg_14_Step);
         break;
-      case 15: // 舞步 3
+      case 15: // Dance 3
         Serial.println("Dance 3 Button Pressed.");
         Servo_PROGRAM_Run(Servo_Prg_15, Servo_Prg_15_Step);
         break;
-      case 100: // 歸零姿勢
+      case 100: // Zero
         Serial.println("Zero");
         Servo_PROGRAM_Zero();
         break;
     }
     Servo_PROGRAM = 0;
   }
-// what is this for ?
-// to keep update RBG LED
+  
+  /* to keep update RBG LED */
   ws2812fx.service();
 }
 
