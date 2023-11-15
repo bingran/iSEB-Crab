@@ -3,6 +3,17 @@
 #include <ESPmDNS.h>
 #include <WS2812FX.h>
 #include <Preferences.h>
+#include "pitches.h"
+
+/* buzzer */
+int melody[] = {
+  NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4
+};
+
+// note durations: 4 = quarter note, 8 = eighth note, etc.:
+int noteDurations[] = {
+  4, 8, 8, 4, 4, 4, 4, 4
+};
 
 /* To store the calibration value for each servo motor */
 Preferences preferences;
@@ -11,6 +22,8 @@ Preferences preferences;
 #define LED_COUNT 8
 #define LED_PIN 21
 #define TIMER_MS 5000
+
+#define buzzerPin 22
 
 WS2812FX ws2812fx = WS2812FX(LED_COUNT, LED_PIN, NEO_RGB + NEO_KHZ800);
 unsigned long last_change = 0;
@@ -36,6 +49,7 @@ unsigned long now = 0;
 #define MERUS_2 5 /* Chanel 5 */
 #define MERUS_3 6 /* Chanel 6 */
 #define MERUS_4 7 /* Chanel 7 */
+#define BUZZER_PWM 8 /* Channel 8 */
 /* PWM DECLARATION END */
 
 /* SERVER DECLARATION START */
@@ -299,6 +313,8 @@ void motorInit()
   ledcSetup(MERUS_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
   ledcSetup(MERUS_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
   ledcSetup(MERUS_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcSetup(BUZZER_PWM, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+
 
   // Attach timer to a led pin
   ledcAttachPin(19, WALKING_1);  /* WALKING_1 *//* CN15 *//* PIN 19*/
@@ -309,6 +325,7 @@ void motorInit()
   ledcAttachPin( 4, MERUS_2);  /* MERUS_2 *//* CN10 *//* PIN  4*/
   ledcAttachPin(32, MERUS_3);  /* MERUS_3 *//* CN8  *//* PIN 32*/
   ledcAttachPin(12, MERUS_4);  /* MERUS_4 *//* CN2  *//* PIN 12*/
+  ledcAttachPin(buzzerPin,BUZZER_PWM);
   delay(50);
 
 }
@@ -889,6 +906,9 @@ void Servo_PROGRAM_Run(int iMatrix[][ALLMATRIX], int iSteps)
 void setup()
 {
   Serial.begin(115200);/* start the serial monitor at 115200 baud rate */
+  Serial.write("Hello World\n");
+
+
   WiFi.softAP(ssid);/* without password */
   // WiFi.softAP(ssid, password);;/* with password */
   WiFi.softAPConfig(local_ip, gateway, subnet); /* to add exception to server */
@@ -915,6 +935,26 @@ void setup()
   motorInit();
   Servo_PROGRAM_Zero();
 
+  // 100Hz tone for 1 second
+  Serial.write("Buzzer\n"); 
+  ledcWriteNote(BUZZER_PWM, NOTE_C, 4);
+  delay(100);
+  ledcWriteNote(BUZZER_PWM, NOTE_D, 4);
+  delay(100);
+  ledcWriteNote(BUZZER_PWM, NOTE_E, 4);
+  delay(100);
+  ledcWriteNote(BUZZER_PWM, NOTE_F, 4);
+  delay(100);
+  ledcWriteNote(BUZZER_PWM, NOTE_G, 4);
+  delay(100);
+  ledcWriteNote(BUZZER_PWM, NOTE_A, 4);
+  delay(100);
+  ledcWriteNote(BUZZER_PWM, NOTE_B, 4);
+  delay(100);
+  ledcWriteNote(BUZZER_PWM, NOTE_C, 5);
+  delay(100);
+  ledcWriteTone(BUZZER_PWM,0);
+
   ws2812fx.init();
   ws2812fx.setBrightness(1);
   ws2812fx.setSegment(0, 0,LED_COUNT, FX_MODE_CUSTOM,  RED, 200, false);
@@ -926,6 +966,9 @@ void setup()
   // RW-mode (second parameter has to be false).
   // Note: Namespace name is limited to 15 chars.
   preferences.begin("iSEBCrab", false);
+
+
+
 }
 
 void loop() 
@@ -1005,6 +1048,8 @@ void loop()
   
   /* to keep update RBG LED */
   ws2812fx.service();
+
+  
 }
 
 uint16_t myCustomEffect(void) { // random chase
