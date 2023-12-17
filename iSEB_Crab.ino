@@ -966,9 +966,6 @@ void setup()
   // RW-mode (second parameter has to be false).
   // Note: Namespace name is limited to 15 chars.
   preferences.begin("iSEBCrab", false);
-
-
-
 }
 
 void loop() 
@@ -1048,8 +1045,6 @@ void loop()
   
   /* to keep update RBG LED */
   ws2812fx.service();
-
-  
 }
 
 uint16_t myCustomEffect(void) { // random chase
