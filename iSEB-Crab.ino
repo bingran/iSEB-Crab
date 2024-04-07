@@ -761,9 +761,9 @@ void handleEditor()
 
   content += "<tr>";
   content += "<td>WALKING4 <span>Default 90<br>0 <input type=range id=range_3 min=0 max=180 value=90 onchange=controlServo(3,'range_3')> 180</span>";
-  content += "<br><input type=text id=servo_3 value=110> <button type=button style=background:#FFE599 onclick=controlServo(3,'servo_3')>Send</button></td>";
+  content += "<br><input type=text id=servo_3 value=90> <button type=button style=background:#FFE599 onclick=controlServo(3,'servo_3')>Send</button></td>";
   content += "<td>MERUS4 <span>Default 90<br>0 <input type=range id=range_7 min=0 max=180 value=90 onchange=controlServo(7,'range_7')> 180</span>";
-  content += "<br><input type=text id=servo_7 value=70> <button type=button style=background:#FFE599 onclick=controlServo(7,'servo_7')>Send</button></td>";
+  content += "<br><input type=text id=servo_7 value=90> <button type=button style=background:#FFE599 onclick=controlServo(7,'servo_7')>Send</button></td>";
   content += "</tr>";
 
   content += "<tr>";
@@ -825,10 +825,11 @@ void Set_PWM_to_Servo(int iServo, int iValue)
   Serial.print(F(" iValue: "));
   Serial.println(iValue);
   // Read from EEPROM to fix zero error reading
-  iValue = (iValue*MAX/180.0)+MIN; /* convertion to pwm value */
+  iValue = (iValue*(MAX-MIN)/180.0)+MIN; /* convertion to pwm value */
   double NewPWM = iValue + preferences.getDouble((String(iServo)).c_str(),0);
-
-  /* 0 = zero degree 550 = 180 degree*/
+  Serial.print(F(" NewPWM: "));
+  Serial.println(NewPWM);
+  /* 50 = zero degree 550 = 180 degree*/
   ledcWrite(iServo,NewPWM);
 }
 
