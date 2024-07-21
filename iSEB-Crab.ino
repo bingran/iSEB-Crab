@@ -305,29 +305,17 @@ int Servo_Prg_15 [][ALLMATRIX] PROGMEM = {
 void motorInit()
 {
   // Setup timer 
-  ledcSetup(WALKING_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(WALKING_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(WALKING_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(WALKING_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(MERUS_1, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(MERUS_2, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(MERUS_3, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(MERUS_4, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
-  ledcSetup(BUZZER_PWM, LEDC_BASE_FREQ, LEDC_TIMER_12_BIT);
+  ledcAttachChannel(19,LEDC_BASE_FREQ, LEDC_TIMER_12_BIT, WALKING_1);  /* WALKING_1 *//* CN15 *//* PIN 19*/
+  ledcAttachChannel(15,LEDC_BASE_FREQ, LEDC_TIMER_12_BIT, WALKING_2);  /* WALKING_2 *//* CN9  *//* PIN 15*/
+  ledcAttachChannel(33,LEDC_BASE_FREQ, LEDC_TIMER_12_BIT, WALKING_3);  /* WALKING_3 *//* CN7  *//* PIN 33*/
+  ledcAttachChannel(13,LEDC_BASE_FREQ, LEDC_TIMER_12_BIT, WALKING_4);  /* WALKING_4*//* CN1  *//* PIN 13*/
+  ledcAttachChannel(23,LEDC_BASE_FREQ, LEDC_TIMER_12_BIT, MERUS_1);  /* MERUS_1 *//* CN16 *//* PIN 23*/
+  ledcAttachChannel( 4,LEDC_BASE_FREQ, LEDC_TIMER_12_BIT, MERUS_2);  /* MERUS_2 *//* CN10 *//* PIN  4*/
+  ledcAttachChannel(32,LEDC_BASE_FREQ, LEDC_TIMER_12_BIT, MERUS_3);  /* MERUS_3 *//* CN8  *//* PIN 32*/
+  ledcAttachChannel(12,LEDC_BASE_FREQ, LEDC_TIMER_12_BIT, MERUS_4);  /* MERUS_4 *//* CN2  *//* PIN 12*/
+  ledcAttachChannel(buzzerPin,LEDC_BASE_FREQ, LEDC_TIMER_12_BIT,BUZZER_PWM);
 
-
-  // Attach timer to a led pin
-  ledcAttachPin(19, WALKING_1);  /* WALKING_1 *//* CN15 *//* PIN 19*/
-  ledcAttachPin(15, WALKING_2);  /* WALKING_2 *//* CN9  *//* PIN 15*/
-  ledcAttachPin(33, WALKING_3);  /* WALKING_3 *//* CN7  *//* PIN 33*/
-  ledcAttachPin(13, WALKING_4);  /* WALKING_4*//* CN1  *//* PIN 13*/
-  ledcAttachPin(23, MERUS_1);  /* MERUS_1 *//* CN16 *//* PIN 23*/
-  ledcAttachPin( 4, MERUS_2);  /* MERUS_2 *//* CN10 *//* PIN  4*/
-  ledcAttachPin(32, MERUS_3);  /* MERUS_3 *//* CN8  *//* PIN 32*/
-  ledcAttachPin(12, MERUS_4);  /* MERUS_4 *//* CN2  *//* PIN 12*/
-  ledcAttachPin(buzzerPin,BUZZER_PWM);
   delay(50);
-
 }
 /* PWM CODE END */
 
@@ -830,7 +818,7 @@ void Set_PWM_to_Servo(int iServo, int iValue)
   Serial.print(F(" NewPWM: "));
   Serial.println(NewPWM);
   /* 50 = zero degree 550 = 180 degree*/
-  ledcWrite(iServo,NewPWM);
+  ledcWriteChannel(iServo,NewPWM);
 }
 
 void Servo_PROGRAM_Standby()
